@@ -94,16 +94,16 @@ final class DiagnoseCommand extends Command
         }
 
         try {
-            $store = $cacheFactory->store();
+            $store = $this->rbacCacheStore($cacheFactory, $config);
             $store->put('vaultrbac:diagnose:probe', '1', 5);
             $probe = $store->get('vaultrbac:diagnose:probe');
             $store->forget('vaultrbac:diagnose:probe');
             if ($probe !== '1') {
-                $this->lineFail('Default cache store read/write probe failed.');
+                $this->lineFail('VaultRBAC cache store read/write probe failed.');
                 $ok = false;
                 $lines[] = ['ok' => false, 'check' => 'cache_probe'];
             } else {
-                $this->lineOk('cache: default store read/write OK');
+                $this->lineOk('cache: VaultRBAC store read/write OK');
                 $lines[] = ['ok' => true, 'check' => 'cache_probe'];
             }
         } catch (Throwable $e) {
@@ -129,6 +129,10 @@ final class DiagnoseCommand extends Command
 
         foreach ($tenantIds as $tid) {
             if ($this->roleHierarchyHasCycle($hierarchy, $tid)) {
+                Log::warning('VaultRBAC integrity: role hierarchy cycle detected', [
+                    'tenant_id' => $tid,
+                    'check' => 'hierarchy_cycle',
+                ]);
                 $this->lineFail("Role hierarchy cycle detected for tenant [{$tid}].");
                 $ok = false;
                 $lines[] = ['ok' => false, 'check' => 'hierarchy_cycle', 'tenant_id' => $tid];
@@ -142,6 +146,31 @@ final class DiagnoseCommand extends Command
                 $v = $versions->getVersion($tid, $scope);
                 $this->lineOk("permission cache version tenant={$tid} scope={$scope} => {$v}");
                 $lines[] = ['ok' => true, 'check' => 'cache_version', 'tenant_id' => $tid, 'version' => $v];
+
+                try {
+                    $rbacStore = $this->rbacCacheStore($cacheFactory, $config);
+                    $prefix = (string) $config->get('vaultrbac.cache.prefix', 'vaultrbac');
+                    $warmKey = $prefix.':warm:tenant:'.(string) $tid.':'.$scope;
+                    $warmVal = $rbacStore->get($warmKey);
+                    if ($warmVal !== null && (int) $warmVal !== (int) $v) {
+                        $this->lineFail("cache warm snapshot drift tenant={$tid} db_version={$v} warm_value={$warmVal}");
+                        $ok = false;
+                        $lines[] = [
+                            'ok' => false,
+                            'check' => 'cache_warm_drift',
+                            'tenant_id' => $tid,
+                            'db_version' => $v,
+                            'warm_value' => $warmVal,
+                        ];
+                    } else {
+                        $this->lineOk("cache warm vs DB version OK (tenant {$tid})");
+                        $lines[] = ['ok' => true, 'check' => 'cache_warm_drift', 'tenant_id' => $tid];
+                    }
+                } catch (Throwable $e) {
+                    $this->lineFail('cache warm drift check error: '.$e->getMessage());
+                    $ok = false;
+                    $lines[] = ['ok' => false, 'check' => 'cache_warm_drift', 'tenant_id' => $tid];
+                }
             } catch (Throwable $e) {
                 $this->lineFail("Permission cache version read failed: {$e->getMessage()}");
                 $ok = false;
@@ -164,6 +193,21 @@ final class DiagnoseCommand extends Command
             }
         }
 
+        if ($tenantFilter === null && Schema::hasTable(VaultrbacTables::name('model_permissions'))
+            && Schema::hasTable(VaultrbacTables::name('permissions'))) {
+            $permOrphans = ModelPermission::query()
+                ->whereNotIn('permission_id', Permission::query()->select('id'))
+                ->count();
+            if ($permOrphans > 0) {
+                $this->lineFail("Orphaned model_permissions rows: {$permOrphans}.");
+                $ok = false;
+                $lines[] = ['ok' => false, 'check' => 'orphan_model_permissions', 'count' => $permOrphans];
+            } else {
+                $this->lineOk('assignments: no orphaned model_permissions');
+                $lines[] = ['ok' => true, 'check' => 'orphan_model_permissions'];
+            }
+        }
+
         if (Schema::hasTable(VaultrbacTables::name('encrypted_metadata'))) {
             try {
                 $metaCount = EncryptedMetadata::query()->count();
@@ -183,6 +227,15 @@ final class DiagnoseCommand extends Command
         }
 
         return $ok ? self::SUCCESS : self::FAILURE;
+    }
+
+    private function rbacCacheStore(CacheFactory $cacheFactory, ConfigRepository $config): CacheRepository
+    {
+        $store = $config->get('vaultrbac.cache.store');
+
+        return ($store !== null && $store !== '')
+            ? $cacheFactory->store((string) $store)
+            : $cacheFactory->store();
     }
 
     private function lineOk(string $message): void
