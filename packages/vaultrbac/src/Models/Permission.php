@@ -5,16 +5,24 @@ declare(strict_types=1);
 namespace Artwallet\VaultRbac\Models;
 
 use Artwallet\VaultRbac\Casts\MaybeEncryptedJson;
+use Artwallet\VaultRbac\Database\Factories\PermissionFactory;
 use Artwallet\VaultRbac\Database\VaultrbacTables;
 use Artwallet\VaultRbac\Models\Concerns\MapsVaultRbacTable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Permission extends Model
 {
+    use HasFactory;
     use MapsVaultRbacTable;
+
+    protected static function newFactory(): PermissionFactory
+    {
+        return PermissionFactory::new();
+    }
 
     protected static function vaultTableKey(): string
     {

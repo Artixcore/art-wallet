@@ -13,10 +13,12 @@ use Artwallet\VaultRbac\Tests\Fixtures\User;
 use Artwallet\VaultRbac\Tests\TestCase;
 use Illuminate\Cache\ArrayStore;
 use Illuminate\Cache\Repository as CacheRepository;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * @group security
  */
+#[Group('security')]
 final class StaleDecisionCacheSecurityTest extends TestCase
 {
     public function test_version_bump_prevents_stale_allow_from_prior_catalog_version(): void

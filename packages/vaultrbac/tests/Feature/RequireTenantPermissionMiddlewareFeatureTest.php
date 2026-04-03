@@ -8,10 +8,12 @@ use Artwallet\VaultRbac\Http\Middleware\RequireTenantPermissionMiddleware;
 use Artwallet\VaultRbac\Tests\Concerns\InteractsWithVaultRbac;
 use Artwallet\VaultRbac\Tests\TestCase;
 use Illuminate\Support\Facades\Route;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * @group security
  */
+#[Group('security')]
 final class RequireTenantPermissionMiddlewareFeatureTest extends TestCase
 {
     use InteractsWithVaultRbac;

@@ -9,11 +9,13 @@ use Artwallet\VaultRbac\Contracts\PermissionResolverInterface;
 use Artwallet\VaultRbac\Resolvers\SafePermissionResolver;
 use Artwallet\VaultRbac\Tests\Fixtures\User;
 use Artwallet\VaultRbac\Tests\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 use RuntimeException;
 
 /**
  * @group security
  */
+#[Group('security')]
 final class SafeResolverSecurityTest extends TestCase
 {
     public function test_inner_exception_yields_deny_not_allow(): void
