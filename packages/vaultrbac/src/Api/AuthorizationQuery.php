@@ -130,24 +130,41 @@ final class AuthorizationQuery
             return PermissionDecision::deny($name, null, PermissionDenialReason::StrictTenantRequired);
         }
 
-        $context = $this->buildContext();
-        $granted = $this->resolver->authorize($context, $name, $this->resource);
-
         $cacheVersion = null;
+        $versionResolved = true;
         if ($this->versions !== null && $tenant !== null) {
             $scope = (string) $this->config->get('vaultrbac.freshness.scope', 'tenant');
+            $strictVersion = (bool) $this->config->get('vaultrbac.freshness.strict_version_read', false);
             try {
                 $cacheVersion = $this->versions->getVersion($tenant, $scope);
             } catch (\Throwable) {
-                $cacheVersion = null;
+                $versionResolved = false;
+                if ($strictVersion) {
+                    return PermissionDecision::deny(
+                        $name,
+                        $tenant,
+                        PermissionDenialReason::VersionReadFailed,
+                        null,
+                        false,
+                    );
+                }
             }
         }
 
+        $context = $this->buildContext();
+        $granted = $this->resolver->authorize($context, $name, $this->resource);
+
         if ($granted) {
-            return PermissionDecision::allow($name, $tenant, $cacheVersion);
+            return PermissionDecision::allow($name, $tenant, $cacheVersion, $versionResolved);
         }
 
-        return PermissionDecision::deny($name, $tenant, PermissionDenialReason::ResolverDenied, $cacheVersion);
+        return PermissionDecision::deny(
+            $name,
+            $tenant,
+            PermissionDenialReason::ResolverDenied,
+            $cacheVersion,
+            $versionResolved,
+        );
     }
 
     public function can(string|\Stringable $ability): bool

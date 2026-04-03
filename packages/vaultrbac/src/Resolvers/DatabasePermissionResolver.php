@@ -65,6 +65,7 @@ final class DatabasePermissionResolver implements PermissionResolverInterface
 
         $teamId = $context->teamId;
 
+        $directAllows = false;
         foreach ($this->repository->directModelPermissions($user, $tenantId, $teamId) as $assignment) {
             $pid = (string) $assignment->permission_id;
             if (! isset($idSet[$pid])) {
@@ -73,16 +74,13 @@ final class DatabasePermissionResolver implements PermissionResolverInterface
             if ($assignment->effect === PermissionEffect::Deny) {
                 return false;
             }
+            if ($assignment->effect === PermissionEffect::Allow) {
+                $directAllows = true;
+            }
         }
 
-        foreach ($this->repository->directModelPermissions($user, $tenantId, $teamId) as $assignment) {
-            $pid = (string) $assignment->permission_id;
-            if (! isset($idSet[$pid])) {
-                continue;
-            }
-            if ($assignment->effect === PermissionEffect::Allow) {
-                return true;
-            }
+        if ($directAllows) {
+            return true;
         }
 
         $effectiveRoleIds = $this->effectiveActiveRoleIds($user, $tenantId, $teamId);

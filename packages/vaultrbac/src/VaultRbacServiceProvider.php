@@ -52,6 +52,7 @@ use Artwallet\VaultRbac\Exceptions\ConfigurationException;
 use Artwallet\VaultRbac\Http\IntegrationAuthorization;
 use Artwallet\VaultRbac\Http\Middleware\AuthorizeVaultPermission;
 use Artwallet\VaultRbac\Http\Middleware\EnforcePermissionFreshnessMiddleware;
+use Artwallet\VaultRbac\Http\Middleware\FlushAuthorizationRequestMemoMiddleware;
 use Artwallet\VaultRbac\Http\Middleware\EnsureTenantMembership;
 use Artwallet\VaultRbac\Http\Middleware\EnsureVaultAnyRole;
 use Artwallet\VaultRbac\Http\Middleware\EnsureVaultRole;
@@ -66,7 +67,10 @@ use Artwallet\VaultRbac\Http\Middleware\RequireTenantContext;
 use Artwallet\VaultRbac\Http\Middleware\RequireTenantPermissionMiddleware;
 use Artwallet\VaultRbac\Http\Middleware\ResolveTenantContextMiddleware;
 use Artwallet\VaultRbac\Listeners\RecordVaultRbacAudit;
+use Artwallet\VaultRbac\Resolvers\MemoizingPermissionResolver;
 use Artwallet\VaultRbac\Resolvers\SafePermissionResolver;
+use Artwallet\VaultRbac\Resolvers\VersionedCachingPermissionResolver;
+use Artwallet\VaultRbac\Support\AuthorizationRequestMemo;
 use Artwallet\VaultRbac\Support\RequestAuthorization;
 use Artwallet\VaultRbac\Tenancy\RequestSourceReader;
 use Illuminate\Contracts\Auth\Authenticatable;
@@ -132,6 +136,7 @@ final class VaultRbacServiceProvider extends ServiceProvider
         $router->aliasMiddleware('vrb.approved.privilege', RequireApprovedPrivilegeMiddleware::class);
         $router->aliasMiddleware('vrb.tenant.resolve', ResolveTenantContextMiddleware::class);
         $router->aliasMiddleware('vrb.permission.freshness', EnforcePermissionFreshnessMiddleware::class);
+        $router->aliasMiddleware('vrb.authorization.memo.flush', FlushAuthorizationRequestMemoMiddleware::class);
 
         $this->loadHelpersIfEnabled();
 
@@ -173,6 +178,7 @@ final class VaultRbacServiceProvider extends ServiceProvider
         $app->singleton(RequestSourceReader::class);
         $app->singleton(IntegrationAuthorization::class);
         $app->singleton(RequestAuthorization::class);
+        $app->singleton(AuthorizationRequestMemo::class);
 
         $this->bindConcrete($app, TenantResolver::class, $bindings['tenant_resolver'] ?? null);
         $this->bindConcrete($app, TeamResolver::class, $bindings['team_resolver'] ?? null);
@@ -242,10 +248,20 @@ final class VaultRbacServiceProvider extends ServiceProvider
                 /** @var CacheFactory $factory */
                 $factory = $app->make(CacheFactory::class);
 
-                return ($store !== null && $store !== '')
-                    ? $factory->store((string) $store)
-                    : $factory->store();
+                return self::resolveVaultrbacCacheRepository($app);
             });
+    }
+
+    private static function resolveVaultrbacCacheRepository(Application $app): \Illuminate\Contracts\Cache\Repository
+    {
+        $store = $app->make('config')->get('vaultrbac.cache.store');
+
+        /** @var CacheFactory $factory */
+        $factory = $app->make(CacheFactory::class);
+
+        return ($store !== null && $store !== '')
+            ? $factory->store((string) $store)
+            : $factory->store();
     }
 
     private function registerVaultGate(): void
@@ -584,6 +600,25 @@ final class VaultRbacServiceProvider extends ServiceProvider
             }
 
             $config = $app->make(ConfigRepository::class);
+
+            if ((bool) $config->get('vaultrbac.cache.request_memo_enabled', false)) {
+                $inner = new MemoizingPermissionResolver(
+                    $inner,
+                    $app->make(AuthorizationRequestMemo::class),
+                );
+            }
+
+            if ((bool) $config->get('vaultrbac.cache.decisions_enabled', false)) {
+                $inner = new VersionedCachingPermissionResolver(
+                    $inner,
+                    self::resolveVaultrbacCacheRepository($app),
+                    $app->make(PermissionCacheVersionRepository::class),
+                    $config,
+                    $app->make(SuperUserGuard::class),
+                    $app->make(LogManager::class),
+                );
+            }
+
             if ($config->get('vaultrbac.integration.safe_resolver', true)) {
                 return new SafePermissionResolver(
                     $inner,

@@ -8,12 +8,16 @@ use Artwallet\VaultRbac\Contracts\HierarchyRepository;
 use Artwallet\VaultRbac\Contracts\PermissionCacheVersionRepository;
 use Artwallet\VaultRbac\Database\VaultrbacTables;
 use Artwallet\VaultRbac\Models\EncryptedMetadata;
+use Artwallet\VaultRbac\Models\ModelPermission;
 use Artwallet\VaultRbac\Models\ModelRole;
+use Artwallet\VaultRbac\Models\Permission;
 use Artwallet\VaultRbac\Models\Role;
 use Artwallet\VaultRbac\Models\Tenant;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Cache\Factory as CacheFactory;
+use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Throwable;
 

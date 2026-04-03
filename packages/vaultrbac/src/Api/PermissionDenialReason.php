@@ -16,4 +16,5 @@ enum PermissionDenialReason: string
     case ResolverDenied = 'resolver_denied';
     case StrictTenantRequired = 'strict_tenant_required';
     case InvalidSubject = 'invalid_subject';
+    case VersionReadFailed = 'version_read_failed';
 }

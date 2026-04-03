@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use Artwallet\VaultRbac\Audit\DatabaseAuditSink;
-use Artwallet\VaultRbac\Cache\NullCacheInvalidator;
+use Artwallet\VaultRbac\Cache\StoreBackedCacheInvalidator;
 use Artwallet\VaultRbac\Context\DefaultAuthorizationContextFactory;
 use Artwallet\VaultRbac\Hierarchy\EloquentRoleHierarchyProvider;
 use Artwallet\VaultRbac\Models\Permission;
@@ -271,6 +271,11 @@ return [
         'header' => env('VAULTRBAC_FRESHNESS_HEADER', 'X-VaultRbac-Permission-Version'),
         'scope' => env('VAULTRBAC_FRESHNESS_SCOPE', 'tenant'),
         'mismatch_status' => (int) env('VAULTRBAC_FRESHNESS_MISMATCH_STATUS', 403),
+        /*
+         * When true, AuthorizationQuery::decide() denies (fail-closed) if the tenant
+         * permission cache version cannot be read from the database.
+         */
+        'strict_version_read' => env('VAULTRBAC_FRESHNESS_STRICT_VERSION_READ', false),
     ],
 
     /*
@@ -342,7 +347,7 @@ return [
         'permission_resolver' => DatabasePermissionResolver::class,
         'role_hierarchy_provider' => EloquentRoleHierarchyProvider::class,
         'audit_sink' => DatabaseAuditSink::class,
-        'cache_invalidator' => NullCacheInvalidator::class,
+        'cache_invalidator' => StoreBackedCacheInvalidator::class,
         'super_user_guard' => NullSuperUserGuard::class,
         'assignment_service' => AssignmentService::class,
         'permission_cache_admin' => PermissionCacheAdminService::class,
@@ -377,13 +382,53 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Cache namespace (prefix for future cache keys)
+    | Cache namespace (prefix for cache keys)
     |--------------------------------------------------------------------------
+    |
+    | store: Laravel cache store name, or null for the default store.
+    |
+    | decisions_enabled: wrap the DB resolver with a version-stamped decision cache.
+    | decision_ttl_seconds: TTL for positive/negative authorize() outcomes.
+    |
+    | fail_closed_on_cache_error: if the cache backend throws on get/put, deny
+    | instead of treating as a cache miss (high security, lower availability).
+    |
+    | request_memo_enabled: memoize authorize() results for the current PHP request
+    | (see FlushAuthorizationRequestMemoMiddleware).
+    |
     */
 
     'cache' => [
-        'store' => null,
-        'prefix' => 'vaultrbac',
+        'store' => env('VAULTRBAC_CACHE_STORE'), // null = default Laravel cache store
+        'prefix' => env('VAULTRBAC_CACHE_PREFIX', 'vaultrbac'),
+        'decisions_enabled' => env('VAULTRBAC_CACHE_DECISIONS_ENABLED', false),
+        'decision_ttl_seconds' => (int) env('VAULTRBAC_CACHE_DECISION_TTL', 60),
+        'fail_closed_on_cache_error' => env('VAULTRBAC_CACHE_FAIL_CLOSED_ON_ERROR', false),
+        'request_memo_enabled' => env('VAULTRBAC_CACHE_REQUEST_MEMO_ENABLED', false),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Cache invalidator (DB version bumps)
+    |--------------------------------------------------------------------------
+    |
+    | bump_all_tenants_on_catalog: when bumpCatalogVersion() runs, bump the
+    | tenant freshness scope for every tenant (expensive; use sparingly).
+    |
+    */
+
+    'cache_invalidator' => [
+        'bump_all_tenants_on_catalog' => env('VAULTRBAC_CACHE_INVALIDATOR_BUMP_ALL_TENANTS', false),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Observability (optional structured diagnostics)
+    |--------------------------------------------------------------------------
+    */
+
+    'observability' => [
+        'log_cache_resolution' => env('VAULTRBAC_OBS_LOG_CACHE', false),
     ],
 
 ];

@@ -17,16 +17,22 @@ final readonly class PermissionDecision
         public string|int|null $tenantId,
         public PermissionDenialReason $reason,
         public ?int $cacheVersion = null,
+        public bool $permissionCacheVersionResolved = true,
     ) {}
 
-    public static function allow(string $ability, string|int|null $tenantId, ?int $cacheVersion = null): self
-    {
+    public static function allow(
+        string $ability,
+        string|int|null $tenantId,
+        ?int $cacheVersion = null,
+        bool $permissionCacheVersionResolved = true,
+    ): self {
         return new self(
             true,
             $ability,
             $tenantId,
             PermissionDenialReason::Granted,
             $cacheVersion,
+            $permissionCacheVersionResolved,
         );
     }
 
@@ -35,6 +41,7 @@ final readonly class PermissionDecision
         string|int|null $tenantId,
         PermissionDenialReason $reason,
         ?int $cacheVersion = null,
+        bool $permissionCacheVersionResolved = true,
     ): self {
         return new self(
             false,
@@ -42,6 +49,7 @@ final readonly class PermissionDecision
             $tenantId,
             $reason,
             $cacheVersion,
+            $permissionCacheVersionResolved,
         );
     }
 
