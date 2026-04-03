@@ -9,6 +9,7 @@ export default defineConfig({
                 'resources/js/app.js',
                 'resources/js/crypto-poc.js',
                 'resources/js/security-center.js',
+                'resources/js/wallet-transactions.js',
             ],
             refresh: true,
         }),

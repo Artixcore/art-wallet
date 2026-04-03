@@ -11,6 +11,7 @@ use App\Domain\Chain\Exceptions\BroadcastRejectedException;
 use App\Domain\Chain\Exceptions\ChainAdapterException;
 use App\Domain\Chain\Exceptions\TamperedTransactionException;
 use App\Models\Asset;
+use App\Models\BlockchainTransaction;
 use App\Models\SupportedNetwork;
 use App\Models\TransactionIntent;
 use Illuminate\Support\Facades\Http;
@@ -96,7 +97,7 @@ final class BitcoinAdapter implements ChainAdapterInterface
             return [
                 'txid' => $txid,
                 'confirmations' => 0,
-                'status' => TransactionIntent::STATUS_PENDING,
+                'status' => BlockchainTransaction::STATUS_PENDING,
                 'block_height' => null,
                 'raw' => [],
             ];
@@ -111,7 +112,7 @@ final class BitcoinAdapter implements ChainAdapterInterface
         return [
             'txid' => $txid,
             'confirmations' => $confirmed ? 1 : 0,
-            'status' => $confirmed ? TransactionIntent::STATUS_CONFIRMED : TransactionIntent::STATUS_PENDING,
+            'status' => $confirmed ? BlockchainTransaction::STATUS_CONFIRMED : BlockchainTransaction::STATUS_PENDING,
             'block_height' => $height !== null ? (int) $height : null,
             'raw' => is_array($j) ? $j : [],
         ];

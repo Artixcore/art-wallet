@@ -11,6 +11,7 @@ use App\Domain\Chain\Exceptions\BroadcastRejectedException;
 use App\Domain\Chain\Exceptions\ChainAdapterException;
 use App\Domain\Chain\Exceptions\TamperedTransactionException;
 use App\Models\Asset;
+use App\Models\BlockchainTransaction;
 use App\Models\SupportedNetwork;
 use App\Models\TransactionIntent;
 use App\Services\Tx\Erc20TransferEncoder;
@@ -119,7 +120,7 @@ final class EthereumAdapter implements ChainAdapterInterface
             return [
                 'txid' => $txid,
                 'confirmations' => 0,
-                'status' => TransactionIntent::STATUS_PENDING,
+                'status' => BlockchainTransaction::STATUS_PENDING,
                 'block_height' => null,
                 'raw' => [],
             ];
@@ -130,7 +131,7 @@ final class EthereumAdapter implements ChainAdapterInterface
         return [
             'txid' => $txid,
             'confirmations' => $blockNumber !== null ? 1 : 0,
-            'status' => $statusOk ? TransactionIntent::STATUS_CONFIRMED : TransactionIntent::STATUS_FAILED,
+            'status' => $statusOk ? BlockchainTransaction::STATUS_CONFIRMED : BlockchainTransaction::STATUS_FAILED,
             'block_height' => $blockNumber,
             'raw' => $receipt,
         ];

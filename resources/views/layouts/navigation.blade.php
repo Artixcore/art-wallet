@@ -22,6 +22,9 @@
                     <x-nav-link :href="route('security.index')" :active="request()->routeIs('security.index')">
                         {{ __('Security') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('wallet.transactions')" :active="request()->routeIs('wallet.transactions')">
+                        {{ __('Wallet') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -87,6 +90,9 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('security.index')" :active="request()->routeIs('security.index')">
                 {{ __('Security') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('wallet.transactions')" :active="request()->routeIs('wallet.transactions')">
+                {{ __('Wallet') }}
             </x-responsive-nav-link>
         </div>
 

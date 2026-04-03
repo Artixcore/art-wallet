@@ -10,7 +10,6 @@ use App\Models\TransactionIntent;
 use App\Models\Wallet;
 use App\Services\Tx\BroadcastService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class BroadcastAjaxController extends Controller
 {

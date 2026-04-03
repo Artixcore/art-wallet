@@ -11,6 +11,7 @@ use App\Domain\Chain\Exceptions\BroadcastRejectedException;
 use App\Domain\Chain\Exceptions\ChainAdapterException;
 use App\Domain\Chain\Exceptions\TamperedTransactionException;
 use App\Models\Asset;
+use App\Models\BlockchainTransaction;
 use App\Models\SupportedNetwork;
 use App\Models\TransactionIntent;
 use Illuminate\Support\Facades\Http;
@@ -100,7 +101,7 @@ final class SolanaAdapter implements ChainAdapterInterface
             return [
                 'txid' => $txid,
                 'confirmations' => 0,
-                'status' => TransactionIntent::STATUS_PENDING,
+                'status' => BlockchainTransaction::STATUS_PENDING,
                 'block_height' => null,
                 'raw' => [],
             ];
@@ -110,7 +111,7 @@ final class SolanaAdapter implements ChainAdapterInterface
             return [
                 'txid' => $txid,
                 'confirmations' => 0,
-                'status' => TransactionIntent::STATUS_FAILED,
+                'status' => BlockchainTransaction::STATUS_FAILED,
                 'block_height' => null,
                 'raw' => $st,
             ];
@@ -120,7 +121,7 @@ final class SolanaAdapter implements ChainAdapterInterface
         return [
             'txid' => $txid,
             'confirmations' => $confirmed ? 32 : 0,
-            'status' => $confirmed ? TransactionIntent::STATUS_CONFIRMED : TransactionIntent::STATUS_PENDING,
+            'status' => $confirmed ? BlockchainTransaction::STATUS_CONFIRMED : BlockchainTransaction::STATUS_PENDING,
             'block_height' => null,
             'raw' => $st,
         ];
