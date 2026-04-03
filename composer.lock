@@ -4,8 +4,64 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0cbc4dc77a1eeff75f257f6ffae9168b",
+    "content-hash": "1ba79fb99d91c5e4e7f876bb0f8e3126",
     "packages": [
+        {
+            "name": "artwallet/vaultrbac",
+            "version": "dev-master",
+            "dist": {
+                "type": "path",
+                "url": "packages/vaultrbac",
+                "reference": "909212e942bb245cf8279e9a510cd84a00093a8c"
+            },
+            "require": {
+                "illuminate/auth": "^11.0|^12.0|^13.0",
+                "illuminate/contracts": "^11.0|^12.0|^13.0",
+                "illuminate/http": "^11.0|^12.0|^13.0",
+                "illuminate/support": "^11.0|^12.0|^13.0",
+                "php": "^8.2"
+            },
+            "require-dev": {
+                "orchestra/testbench": "^10.0|^11.0",
+                "phpunit/phpunit": "^11.0|^12.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Artwallet\\VaultRbac\\VaultRbacServiceProvider"
+                    ],
+                    "aliases": {
+                        "VaultRbac": "Artwallet\\VaultRbac\\Facades\\VaultRbac"
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Artwallet\\VaultRbac\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Artwallet\\VaultRbac\\Tests\\": "tests/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "Enterprise-grade, tenant-aware RBAC for Laravel (VaultRBAC).",
+            "keywords": [
+                "authorization",
+                "laravel",
+                "multi-tenant",
+                "permissions",
+                "rbac",
+                "roles"
+            ],
+            "transport-options": {
+                "relative": true
+            }
+        },
         {
             "name": "brick/math",
             "version": "0.14.8",
@@ -8203,7 +8259,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "artwallet/vaultrbac": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

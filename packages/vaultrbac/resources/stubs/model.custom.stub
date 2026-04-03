@@ -1,0 +1,20 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ namespace }};
+
+use Artwallet\VaultRbac\Models\Concerns\MapsVaultRbacTable;
+use Illuminate\Database\Eloquent\Model;
+
+class {{ class }} extends Model
+{
+    use MapsVaultRbacTable;
+
+    protected static function vaultTableKey(): string
+    {
+        return '{{ tableKey }}';
+    }
+
+    //
+}
