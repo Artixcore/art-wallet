@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
-use Artwallet\VaultRbac\Database\VaultrbacTables;
+use Artixcore\ArtGate\Database\ArtGateTables;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
@@ -41,7 +41,7 @@ final class VaultRbacMigrationsTest extends TestCase
 
         foreach ($keys as $key) {
             $this->assertTrue(
-                Schema::hasTable(VaultrbacTables::name($key)),
+                Schema::hasTable(ArtGateTables::name($key)),
                 "Expected table [{$key}] to exist.",
             );
         }

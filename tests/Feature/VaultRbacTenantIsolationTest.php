@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Models\User;
-use Artwallet\VaultRbac\Models\Permission;
-use Artwallet\VaultRbac\Models\Role;
-use Artwallet\VaultRbac\Models\Team;
-use Artwallet\VaultRbac\Models\Tenant;
+use Artixcore\ArtGate\Models\Permission;
+use Artixcore\ArtGate\Models\Role;
+use Artixcore\ArtGate\Models\Team;
+use Artixcore\ArtGate\Models\Tenant;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Route;
 use Tests\TestCase;
@@ -21,20 +21,20 @@ final class VaultRbacTenantIsolationTest extends TestCase
     {
         parent::setUp();
 
-        Route::middleware(['web', 'auth', 'vault.permission:phase4.view'])
+        Route::middleware(['web', 'auth', 'artgate.authorize:phase4.view'])
             ->get('/__vault_phase4_perm', fn () => response('ok', 200));
 
-        Route::middleware(['web', 'auth', 'vault.tenant', 'vault.tenant.member'])
+        Route::middleware(['web', 'auth', 'artgate.tenant', 'artgate.tenant.member'])
             ->get('/__vault_phase4_member', fn () => response('member', 200));
     }
 
     public function test_request_tenant_header_is_used_for_authorization(): void
     {
         config([
-            'vaultrbac.tenant.sources' => [
+            'artgate.tenant.sources' => [
                 ['driver' => 'header', 'name' => 'X-Tenant-Id', 'cast' => 'int'],
             ],
-            'vaultrbac.default_tenant_id' => null,
+            'artgate.default_tenant_id' => null,
         ]);
 
         $tenantA = Tenant::query()->create([
@@ -85,7 +85,7 @@ final class VaultRbacTenantIsolationTest extends TestCase
     public function test_membership_middleware_rejects_unknown_tenant(): void
     {
         config([
-            'vaultrbac.tenant.sources' => [
+            'artgate.tenant.sources' => [
                 ['driver' => 'header', 'name' => 'X-Tenant-Id', 'cast' => 'int'],
             ],
         ]);
@@ -126,13 +126,13 @@ final class VaultRbacTenantIsolationTest extends TestCase
     public function test_team_header_scopes_role_assignments(): void
     {
         config([
-            'vaultrbac.tenant.sources' => [
+            'artgate.tenant.sources' => [
                 ['driver' => 'header', 'name' => 'X-Tenant-Id', 'cast' => 'int'],
             ],
-            'vaultrbac.team.sources' => [
+            'artgate.team.sources' => [
                 ['driver' => 'header', 'name' => 'X-Team-Id', 'cast' => 'int'],
             ],
-            'vaultrbac.default_tenant_id' => null,
+            'artgate.default_tenant_id' => null,
         ]);
 
         $tenant = Tenant::query()->create([

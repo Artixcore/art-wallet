@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Models\User;
-use Artwallet\VaultRbac\Models\Permission;
-use Artwallet\VaultRbac\Models\Role;
-use Artwallet\VaultRbac\Models\Tenant;
+use Artixcore\ArtGate\Models\Permission;
+use Artixcore\ArtGate\Models\Role;
+use Artixcore\ArtGate\Models\Tenant;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
@@ -47,9 +47,9 @@ final class VaultRbacPhase6Test extends TestCase
         $user = User::factory()->create();
         $user->assignRole('phase6_gate_role', $tenant->id);
 
-        config(['vaultrbac.default_tenant_id' => $tenant->id]);
+        config(['artgate.default_tenant_id' => $tenant->id]);
 
-        $ability = (string) config('vaultrbac.gate.ability');
+        $ability = (string) config('artgate.gate.ability');
 
         $this->assertTrue(Gate::forUser($user)->allows($ability, ['phase6.gate.test']));
         $this->assertFalse(Gate::forUser($user)->allows($ability, ['phase6.gate.denied']));
@@ -72,9 +72,9 @@ final class VaultRbacPhase6Test extends TestCase
         $user = User::factory()->create();
         $user->assignRole('phase6_mw_role', $tenant->id);
 
-        Route::middleware(['web', 'vault.role:phase6_mw_role'])->get('/_vaultrbac_phase6_role', fn () => 'ok');
+        Route::middleware(['web', 'artgate.ensure-role:phase6_mw_role'])->get('/_vaultrbac_phase6_role', fn () => 'ok');
 
-        config(['vaultrbac.default_tenant_id' => $tenant->id]);
+        config(['artgate.default_tenant_id' => $tenant->id]);
 
         $this->actingAs($user)->get('/_vaultrbac_phase6_role')->assertOk()->assertSee('ok');
     }
@@ -98,16 +98,16 @@ final class VaultRbacPhase6Test extends TestCase
         $user = User::factory()->create();
         $user->assignRole('phase6_alt_b', $tenant->id);
 
-        Route::middleware(['web', 'vault.any-role:phase6_alt_a|phase6_alt_b'])->get('/_vaultrbac_phase6_any', fn () => 'yes');
+        Route::middleware(['web', 'artgate.ensure-any-role:phase6_alt_a|phase6_alt_b'])->get('/_vaultrbac_phase6_any', fn () => 'yes');
 
-        config(['vaultrbac.default_tenant_id' => $tenant->id]);
+        config(['artgate.default_tenant_id' => $tenant->id]);
 
         $this->actingAs($user)->get('/_vaultrbac_phase6_any')->assertOk()->assertSee('yes');
     }
 
     public function test_blade_vaultcan_and_vaultrole(): void
     {
-        config(['vaultrbac.blade.enabled' => true]);
+        config(['artgate.blade.enabled' => true]);
 
         $tenant = Tenant::query()->create([
             'slug' => 'phase6-blade',
@@ -137,19 +137,19 @@ final class VaultRbacPhase6Test extends TestCase
         $user->assignRole('phase6_blade_role', $tenant->id);
 
         $this->actingAs($user);
-        config(['vaultrbac.default_tenant_id' => $tenant->id]);
+        config(['artgate.default_tenant_id' => $tenant->id]);
 
-        $can = Blade::render("@vaultcan('phase6.blade.perm') YES @else NO @endvaultcan");
+        $can = Blade::render("@artgatecan('phase6.blade.perm') YES @else NO @endartgatecan");
         $this->assertStringContainsString('YES', $can);
         $this->assertStringNotContainsString('NO', $can);
 
-        $roleBlade = Blade::render("@vaultrole('phase6_blade_role') IN @else OUT @endvaultrole");
+        $roleBlade = Blade::render("@artgaterole('phase6_blade_role') IN @else OUT @endartgaterole");
         $this->assertStringContainsString('IN', $roleBlade);
     }
 
-    public function test_artisan_vaultrbac_doctor_succeeds_after_migrate(): void
+    public function test_artisan_artgate_doctor_succeeds_after_migrate(): void
     {
-        $this->artisan('vaultrbac:doctor')->assertExitCode(0);
+        $this->artisan('artgate:doctor')->assertExitCode(0);
     }
 
     public function test_artisan_sync_permissions_inserts_configured_rows(): void
@@ -161,19 +161,19 @@ final class VaultRbacPhase6Test extends TestCase
         ]);
 
         config([
-            'vaultrbac.sync.permissions' => [
+            'artgate.sync.permissions' => [
                 'phase6_sync_plain',
                 ['name' => 'phase6_sync_rich', 'permission_group' => 'g'],
             ],
         ]);
 
-        $this->artisan('vaultrbac:sync-permissions', ['--tenant' => (string) $tenant->id])->assertExitCode(0);
+        $this->artisan('artgate:sync-permissions', ['--tenant' => (string) $tenant->id])->assertExitCode(0);
 
-        $this->assertDatabaseHas((string) config('vaultrbac.tables.permissions'), [
+        $this->assertDatabaseHas((string) config('artgate.tables.permissions'), [
             'tenant_id' => $tenant->id,
             'name' => 'phase6_sync_plain',
         ]);
-        $this->assertDatabaseHas((string) config('vaultrbac.tables.permissions'), [
+        $this->assertDatabaseHas((string) config('artgate.tables.permissions'), [
             'tenant_id' => $tenant->id,
             'name' => 'phase6_sync_rich',
             'permission_group' => 'g',

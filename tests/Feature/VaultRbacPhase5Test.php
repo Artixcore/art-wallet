@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Models\User;
-use Artwallet\VaultRbac\Contracts\ApprovalWorkflowInterface;
-use Artwallet\VaultRbac\Database\VaultrbacTables;
-use Artwallet\VaultRbac\Enums\ApprovalStatus;
-use Artwallet\VaultRbac\Facades\VaultRbac;
-use Artwallet\VaultRbac\Models\AuditEvent;
-use Artwallet\VaultRbac\Models\ModelRole;
-use Artwallet\VaultRbac\Models\Role;
-use Artwallet\VaultRbac\Models\Tenant;
+use Artixcore\ArtGate\Contracts\ApprovalWorkflowInterface;
+use Artixcore\ArtGate\Database\ArtGateTables;
+use Artixcore\ArtGate\Enums\ApprovalStatus;
+use Artixcore\ArtGate\Facades\ArtGate;
+use Artixcore\ArtGate\Models\AuditEvent;
+use Artixcore\ArtGate\Models\ModelRole;
+use Artixcore\ArtGate\Models\Role;
+use Artixcore\ArtGate\Models\Tenant;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
@@ -24,8 +24,8 @@ final class VaultRbacPhase5Test extends TestCase
     public function test_audit_chain_links_consecutive_writes(): void
     {
         config([
-            'vaultrbac.audit.enabled' => true,
-            'vaultrbac.audit.register_listeners' => true,
+            'artgate.audit.enabled' => true,
+            'artgate.audit.register_listeners' => true,
         ]);
 
         $tenant = Tenant::query()->create([
@@ -48,14 +48,14 @@ final class VaultRbacPhase5Test extends TestCase
 
         $user = User::factory()->create();
         $this->actingAs($user);
-        config(['vaultrbac.default_tenant_id' => $tenant->id]);
+        config(['artgate.default_tenant_id' => $tenant->id]);
 
         $user->assignRole('r1', $tenant->id);
         $user->assignRole('r2', $tenant->id);
 
         $events = AuditEvent::query()->orderBy('id')->get();
         $this->assertCount(2, $events);
-        $this->assertSame((string) config('vaultrbac.audit.genesis_prev_hash'), (string) $events[0]->prev_hash);
+        $this->assertSame((string) config('artgate.audit.genesis_prev_hash'), (string) $events[0]->prev_hash);
         $this->assertSame((string) $events[0]->row_hash, (string) $events[1]->prev_hash);
         $this->assertNotNull($events[0]->signature);
     }
@@ -101,13 +101,13 @@ final class VaultRbacPhase5Test extends TestCase
         );
 
         $this->actingAs($subject);
-        config(['vaultrbac.default_tenant_id' => $tenant->id]);
-        $this->assertFalse(VaultRbac::check('any.unassigned'));
+        config(['artgate.default_tenant_id' => $tenant->id]);
+        $this->assertFalse(ArtGate::check('any.unassigned'));
     }
 
     public function test_role_metadata_is_encrypted_when_enabled(): void
     {
-        config(['vaultrbac.encryption.metadata.enabled' => true]);
+        config(['artgate.encryption.metadata.enabled' => true]);
 
         $tenant = Tenant::query()->create([
             'slug' => 'enc',
@@ -124,7 +124,7 @@ final class VaultRbacPhase5Test extends TestCase
             'tenant_id' => $tenant->id,
         ]);
 
-        $raw = (string) DB::table(VaultrbacTables::name('roles'))->where('id', $role->id)->value('metadata');
+        $raw = (string) DB::table(ArtGateTables::name('roles'))->where('id', $role->id)->value('metadata');
         $this->assertStringNotContainsString($secret, $raw);
 
         $role->refresh();

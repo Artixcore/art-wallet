@@ -4,15 +4,15 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1ba79fb99d91c5e4e7f876bb0f8e3126",
+    "content-hash": "8d13339c8393872ba8239a6a63bd4c33",
     "packages": [
         {
-            "name": "artwallet/vaultrbac",
-            "version": "dev-master",
+            "name": "artixcore/artgate",
+            "version": "dev-main",
             "dist": {
                 "type": "path",
-                "url": "packages/vaultrbac",
-                "reference": "ee437bd81d9689144b1daece24334ae67f70b296"
+                "url": "../artgate",
+                "reference": "6a5a8c889a117873757fb5885dc5dee148447dd0"
             },
             "require": {
                 "illuminate/auth": "^11.0|^12.0|^13.0",
@@ -32,27 +32,45 @@
             "extra": {
                 "laravel": {
                     "providers": [
-                        "Artwallet\\VaultRbac\\VaultRbacServiceProvider"
+                        "Artixcore\\ArtGate\\ArtGateServiceProvider"
                     ],
                     "aliases": {
-                        "VaultRbac": "Artwallet\\VaultRbac\\Facades\\VaultRbac"
+                        "ArtGate": "Artixcore\\ArtGate\\Facades\\ArtGate"
                     }
                 }
             },
             "autoload": {
                 "psr-4": {
-                    "Artwallet\\VaultRbac\\": "src/"
+                    "Artixcore\\ArtGate\\": "src/",
+                    "Artixcore\\ArtGate\\Database\\Factories\\": "database/factories/"
                 }
             },
             "autoload-dev": {
                 "psr-4": {
-                    "Artwallet\\VaultRbac\\Tests\\": "tests/"
+                    "Artixcore\\ArtGate\\Tests\\": "tests/"
                 }
+            },
+            "scripts": {
+                "test": [
+                    "@php vendor/bin/phpunit -c phpunit.xml.dist"
+                ],
+                "test:unit": [
+                    "@php vendor/bin/phpunit -c phpunit.xml.dist --testsuite Unit"
+                ],
+                "test:integration": [
+                    "@php vendor/bin/phpunit -c phpunit.xml.dist --testsuite Integration"
+                ],
+                "test:security": [
+                    "@php vendor/bin/phpunit -c phpunit.xml.dist --group security"
+                ],
+                "test:diagnostics": [
+                    "@php vendor/bin/phpunit -c phpunit.xml.dist --testsuite Diagnostics"
+                ]
             },
             "license": [
                 "MIT"
             ],
-            "description": "Enterprise-grade, tenant-aware RBAC for Laravel (VaultRBAC).",
+            "description": "Enterprise-grade, tenant-aware RBAC for Laravel (ArtGate).",
             "keywords": [
                 "authorization",
                 "laravel",
@@ -62,6 +80,7 @@
                 "roles"
             ],
             "transport-options": {
+                "symlink": true,
                 "relative": true
             }
         },
@@ -8263,7 +8282,7 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "artwallet/vaultrbac": 20
+        "artixcore/artgate": 20
     },
     "prefer-stable": true,
     "prefer-lowest": false,

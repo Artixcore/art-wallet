@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Models\User;
-use Artwallet\VaultRbac\Facades\VaultRbac;
-use Artwallet\VaultRbac\Models\Permission;
-use Artwallet\VaultRbac\Models\Role;
-use Artwallet\VaultRbac\Models\RoleHierarchy;
-use Artwallet\VaultRbac\Models\Tenant;
+use Artixcore\ArtGate\Facades\ArtGate;
+use Artixcore\ArtGate\Models\Permission;
+use Artixcore\ArtGate\Models\Role;
+use Artixcore\ArtGate\Models\RoleHierarchy;
+use Artixcore\ArtGate\Models\Tenant;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -47,10 +47,10 @@ final class VaultRbacAuthorizationTest extends TestCase
         $user->assignRole('editor', $tenant->id);
 
         $this->actingAs($user);
-        config(['vaultrbac.default_tenant_id' => $tenant->id]);
+        config(['artgate.default_tenant_id' => $tenant->id]);
 
-        $this->assertTrue(VaultRbac::check('posts.edit'));
-        $this->assertFalse(VaultRbac::check('posts.delete'));
+        $this->assertTrue(ArtGate::check('posts.edit'));
+        $this->assertFalse(ArtGate::check('posts.delete'));
     }
 
     public function test_direct_deny_overrides_role_allow(): void
@@ -84,9 +84,9 @@ final class VaultRbacAuthorizationTest extends TestCase
         $user->givePermissionTo('vault.access', $tenant->id, null, 'deny');
 
         $this->actingAs($user);
-        config(['vaultrbac.default_tenant_id' => $tenant->id]);
+        config(['artgate.default_tenant_id' => $tenant->id]);
 
-        $this->assertFalse(VaultRbac::check('vault.access'));
+        $this->assertFalse(ArtGate::check('vault.access'));
     }
 
     public function test_hierarchy_inherits_parent_role_permissions(): void
@@ -131,8 +131,8 @@ final class VaultRbacAuthorizationTest extends TestCase
         $user->assignRole('viewer_plus', $tenant->id);
 
         $this->actingAs($user);
-        config(['vaultrbac.default_tenant_id' => $tenant->id]);
+        config(['artgate.default_tenant_id' => $tenant->id]);
 
-        $this->assertTrue(VaultRbac::check('reports.view'));
+        $this->assertTrue(ArtGate::check('reports.view'));
     }
 }

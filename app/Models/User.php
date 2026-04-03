@@ -3,7 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Artwallet\VaultRbac\Traits\HasVaultRoles;
+use Artixcore\ArtGate\Traits\HasArtGateRoles;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -16,7 +16,7 @@ use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, HasVaultRoles, Notifiable;
+    use HasFactory, HasArtGateRoles, Notifiable;
 
     public function isAdmin(): bool
     {

@@ -8,12 +8,15 @@
     "repositories": [
         {
             "type": "path",
-            "url": "packages/vaultrbac"
+            "url": "../artgate",
+            "options": {
+                "symlink": true
+            }
         }
     ],
     "require": {
         "php": "^8.3",
-        "artwallet/vaultrbac": "@dev",
+        "artixcore/artgate": "@dev",
         "laravel/framework": "^13.0",
         "laravel/tinker": "^3.0"
     },

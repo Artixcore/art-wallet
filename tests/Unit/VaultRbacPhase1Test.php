@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Tests\Unit;
 
-use Artwallet\VaultRbac\Facades\VaultRbac;
+use Artixcore\ArtGate\Facades\ArtGate;
 use Tests\TestCase;
 
 final class VaultRbacPhase1Test extends TestCase
 {
     public function test_default_resolver_denies_all(): void
     {
-        $this->assertFalse(VaultRbac::check('anything'));
+        $this->assertFalse(ArtGate::check('anything'));
     }
 }

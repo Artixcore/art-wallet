@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
-use Artwallet\VaultRbac\Casts\ValidatedJsonArray;
-use Artwallet\VaultRbac\Contracts\PermissionCacheVersionRepository;
-use Artwallet\VaultRbac\Contracts\RoleRepository;
-use Artwallet\VaultRbac\Contracts\TenantRepository;
-use Artwallet\VaultRbac\Enums\CacheBumpScope;
-use Artwallet\VaultRbac\Enums\TenantStatus;
-use Artwallet\VaultRbac\Exceptions\Data\CastTransformationException;
-use Artwallet\VaultRbac\Exceptions\Data\DuplicateEntityException;
-use Artwallet\VaultRbac\Exceptions\Data\EntityNotFoundException;
-use Artwallet\VaultRbac\Exceptions\Data\UnsupportedIdentifierTypeException;
-use Artwallet\VaultRbac\Models\Tenant;
-use Artwallet\VaultRbac\Models\TenantRole;
-use Artwallet\VaultRbac\Support\PrimaryKey;
+use Artixcore\ArtGate\Casts\ValidatedJsonArray;
+use Artixcore\ArtGate\Contracts\PermissionCacheVersionRepository;
+use Artixcore\ArtGate\Contracts\RoleRepository;
+use Artixcore\ArtGate\Contracts\TenantRepository;
+use Artixcore\ArtGate\Enums\CacheBumpScope;
+use Artixcore\ArtGate\Enums\TenantStatus;
+use Artixcore\ArtGate\Exceptions\Data\CastTransformationException;
+use Artixcore\ArtGate\Exceptions\Data\DuplicateEntityException;
+use Artixcore\ArtGate\Exceptions\Data\EntityNotFoundException;
+use Artixcore\ArtGate\Exceptions\Data\UnsupportedIdentifierTypeException;
+use Artixcore\ArtGate\Models\Tenant;
+use Artixcore\ArtGate\Models\TenantRole;
+use Artixcore\ArtGate\Support\PrimaryKey;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
