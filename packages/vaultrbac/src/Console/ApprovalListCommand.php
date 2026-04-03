@@ -38,7 +38,7 @@ final class ApprovalListCommand extends Command
                 'id=%s tenant=%s status=%s correlation=%s',
                 $row->getKey(),
                 $row->tenant_id,
-                $row->status->value,
+                $row->status instanceof \BackedEnum ? $row->status->value : (string) $row->status,
                 $row->correlation_id,
             ));
         }

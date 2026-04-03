@@ -184,7 +184,7 @@ final class VaultRbacServiceProvider extends ServiceProvider
         $this->bindConcrete($app, CacheInvalidator::class, $bindings['cache_invalidator'] ?? null);
         $this->bindConcrete($app, SuperUserGuard::class, $bindings['super_user_guard'] ?? null);
         $this->bindConcrete($app, AssignmentServiceInterface::class, $bindings['assignment_service'] ?? null);
-        $this->registerPermissionCacheAdminBinding($app, $bindings, (string) ($bindings['permission_cache_admin'] ?? \Artwallet\VaultRbac\Services\PermissionCacheAdminService::class));
+        $this->registerPermissionCacheAdminBinding($app, (string) ($bindings['permission_cache_admin'] ?? \Artwallet\VaultRbac\Services\PermissionCacheAdminService::class));
         $this->bindConcrete($app, TemporaryGrantServiceInterface::class, $bindings['temporary_grant_service'] ?? null);
         $this->bindConcrete($app, ApprovalWorkflowInterface::class, $bindings['approval_workflow'] ?? null);
         $this->bindConcrete($app, TenantMembershipVerifier::class, $bindings['tenant_membership_verifier'] ?? null);
@@ -215,10 +215,7 @@ final class VaultRbacServiceProvider extends ServiceProvider
         });
     }
 
-    /**
-     * @param  array<string, mixed>  $bindings
-     */
-    private function registerPermissionCacheAdminBinding(Application $app, array $bindings, string $implementation): void
+    private function registerPermissionCacheAdminBinding(Application $app, string $implementation): void
     {
         if ($implementation === '') {
             throw new ConfigurationException(
