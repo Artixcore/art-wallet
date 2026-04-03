@@ -7,7 +7,6 @@ namespace Artwallet\VaultRbac\Tests\Unit;
 use Artwallet\VaultRbac\Context\AuthorizationContext;
 use Artwallet\VaultRbac\Contracts\PermissionCacheVersionRepository;
 use Artwallet\VaultRbac\Contracts\PermissionResolverInterface;
-use Artwallet\VaultRbac\Contracts\SuperUserGuard;
 use Artwallet\VaultRbac\Resolvers\VersionedCachingPermissionResolver;
 use Artwallet\VaultRbac\Security\NullSuperUserGuard;
 use Artwallet\VaultRbac\Tests\Fixtures\User;
