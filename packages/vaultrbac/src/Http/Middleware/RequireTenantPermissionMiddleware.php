@@ -14,7 +14,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
 /**
- * Middleware spec: tenantRouteParameter,permission (comma-separated), e.g. organization,posts.update
+ * Route middleware: name route parameter then permission ability.
+ * Register as vrb.tenant.permission:tenantRouteParameter,permission.name
+ * (Laravel passes the two segments after the colon as separate arguments).
  */
 final class RequireTenantPermissionMiddleware
 {
@@ -24,8 +26,12 @@ final class RequireTenantPermissionMiddleware
         private readonly IntegrationAuthorization $integration,
     ) {}
 
-    public function handle(Request $request, Closure $next, string $spec = ''): Response
-    {
+    public function handle(
+        Request $request,
+        Closure $next,
+        string $tenantRouteParameter = '',
+        string $permission = '',
+    ): Response {
         $this->integration->assertAuthenticatedOrAbort($request);
 
         $user = $request->user();
@@ -33,14 +39,12 @@ final class RequireTenantPermissionMiddleware
             abort($this->integration->missingPermissionStatus());
         }
 
-        $parts = array_values(array_filter(array_map(trim(...), explode(',', $spec))));
+        $tenantParam = trim($tenantRouteParameter);
+        $permissionName = trim($permission);
         $this->integration->abortIfInvalidArgument(
-            count($parts) >= 2,
+            $tenantParam !== '' && $permissionName !== '',
             'vrb.context.tenant.permission requires tenantRouteParameter,permission.',
         );
-
-        $tenantParam = $parts[0];
-        $permission = $parts[1];
 
         $tenantId = $this->routeValue($request, $tenantParam);
         $this->integration->abortIfInvalidArgument(
@@ -51,7 +55,7 @@ final class RequireTenantPermissionMiddleware
         $context = $this->contextFactory->makeFor($user)->withTenant($tenantId);
 
         try {
-            if (! $this->resolver->authorize($context, $permission)) {
+            if (! $this->resolver->authorize($context, $permissionName)) {
                 abort($this->integration->missingPermissionStatus());
             }
         } catch (Throwable $e) {

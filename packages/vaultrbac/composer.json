@@ -47,5 +47,12 @@
     },
     "config": {
         "sort-packages": true
+    },
+    "scripts": {
+        "test": "@php vendor/bin/phpunit -c phpunit.xml.dist",
+        "test:unit": "@php vendor/bin/phpunit -c phpunit.xml.dist --testsuite Unit",
+        "test:integration": "@php vendor/bin/phpunit -c phpunit.xml.dist --testsuite Integration",
+        "test:security": "@php vendor/bin/phpunit -c phpunit.xml.dist --group security",
+        "test:diagnostics": "@php vendor/bin/phpunit -c phpunit.xml.dist --testsuite Diagnostics"
     }
 }

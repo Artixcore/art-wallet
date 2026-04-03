@@ -14,7 +14,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
 /**
- * Explicit tenant + team from route: tenantParam,teamParam,permission
+ * Tenant + team route parameters then permission ability (three middleware parameters after the colon).
  */
 final class RequireContextPermissionMiddleware
 {
@@ -24,8 +24,13 @@ final class RequireContextPermissionMiddleware
         private readonly IntegrationAuthorization $integration,
     ) {}
 
-    public function handle(Request $request, Closure $next, string $spec = ''): Response
-    {
+    public function handle(
+        Request $request,
+        Closure $next,
+        string $tenantRouteParameter = '',
+        string $teamRouteParameter = '',
+        string $permission = '',
+    ): Response {
         $this->integration->assertAuthenticatedOrAbort($request);
 
         $user = $request->user();
@@ -33,15 +38,13 @@ final class RequireContextPermissionMiddleware
             abort($this->integration->missingPermissionStatus());
         }
 
-        $parts = array_values(array_filter(array_map(trim(...), explode(',', $spec))));
+        $tenantParam = trim($tenantRouteParameter);
+        $teamParam = trim($teamRouteParameter);
+        $permissionName = trim($permission);
         $this->integration->abortIfInvalidArgument(
-            count($parts) >= 3,
+            $tenantParam !== '' && $teamParam !== '' && $permissionName !== '',
             'vrb.context.permission requires tenantRouteParameter,teamRouteParameter,permission.',
         );
-
-        $tenantParam = $parts[0];
-        $teamParam = $parts[1];
-        $permission = $parts[2];
 
         $tenantId = $this->routeValue($request, $tenantParam);
         $teamId = $this->routeValue($request, $teamParam);
@@ -61,7 +64,7 @@ final class RequireContextPermissionMiddleware
             ->withTeam($teamId);
 
         try {
-            if (! $this->resolver->authorize($context, $permission)) {
+            if (! $this->resolver->authorize($context, $permissionName)) {
                 abort($this->integration->missingPermissionStatus());
             }
         } catch (Throwable $e) {
