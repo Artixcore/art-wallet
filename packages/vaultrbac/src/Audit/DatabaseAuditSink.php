@@ -6,7 +6,7 @@ namespace Artwallet\VaultRbac\Audit;
 
 use Artwallet\VaultRbac\Contracts\AuditSink;
 use Artwallet\VaultRbac\Exceptions\ConfigurationException;
-use Artwallet\VaultRbac\Models\AuditEvent;
+use Artwallet\VaultRbac\Models\AuditLog;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use Illuminate\Database\DatabaseManager;
 use Illuminate\Http\Request;
@@ -26,7 +26,7 @@ final class DatabaseAuditSink implements AuditSink
         $secret = $this->secret();
 
         $this->db->connection()->transaction(function () use ($record, $secret): void {
-            $previous = AuditEvent::query()
+            $previous = AuditLog::query()
                 ->orderByDesc('id')
                 ->lockForUpdate()
                 ->first();
@@ -44,7 +44,7 @@ final class DatabaseAuditSink implements AuditSink
 
             $request = $this->currentRequest();
 
-            AuditEvent::query()->insert([
+            AuditLog::query()->insert([
                 'occurred_at' => $occurredAt,
                 'tenant_id' => $this->nullableBigIntColumn($record->tenantId),
                 'actor_type' => $record->actorType,

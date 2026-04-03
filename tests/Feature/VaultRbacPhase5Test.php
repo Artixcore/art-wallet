@@ -7,6 +7,7 @@ namespace Tests\Feature;
 use App\Models\User;
 use Artwallet\VaultRbac\Contracts\ApprovalWorkflowInterface;
 use Artwallet\VaultRbac\Database\VaultrbacTables;
+use Artwallet\VaultRbac\Enums\ApprovalStatus;
 use Artwallet\VaultRbac\Facades\VaultRbac;
 use Artwallet\VaultRbac\Models\AuditEvent;
 use Artwallet\VaultRbac\Models\ModelRole;
@@ -85,11 +86,11 @@ final class VaultRbacPhase5Test extends TestCase
             $requester->id,
         );
 
-        $this->assertSame('pending', $request->fresh()->status);
+        $this->assertSame(ApprovalStatus::Pending, $request->fresh()->status);
 
         $workflow->approve($request->id, $approver->id);
 
-        $this->assertSame('approved', $request->fresh()->status);
+        $this->assertSame(ApprovalStatus::Approved, $request->fresh()->status);
 
         $this->assertTrue(
             ModelRole::query()

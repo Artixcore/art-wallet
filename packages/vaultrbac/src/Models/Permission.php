@@ -7,6 +7,7 @@ namespace Artwallet\VaultRbac\Models;
 use Artwallet\VaultRbac\Casts\MaybeEncryptedJson;
 use Artwallet\VaultRbac\Database\VaultrbacTables;
 use Artwallet\VaultRbac\Models\Concerns\MapsVaultRbacTable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -40,6 +41,17 @@ class Permission extends Model
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class, 'tenant_id');
+    }
+
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
+    public function scopeForTenantOrGlobal(Builder $query, string|int $tenantId): Builder
+    {
+        return $query->where(function (Builder $q) use ($tenantId): void {
+            $q->whereNull('tenant_id')->orWhere('tenant_id', $tenantId);
+        });
     }
 
     public function roles(): BelongsToMany

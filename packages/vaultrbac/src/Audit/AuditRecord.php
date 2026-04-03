@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Artwallet\VaultRbac\Audit;
 
 use Artwallet\VaultRbac\Contracts\AuditSink;
-use Artwallet\VaultRbac\Models\AuditEvent;
+use Artwallet\VaultRbac\Models\AuditLog;
 
 /**
  * Structured audit payload for {@see AuditSink}.
@@ -13,7 +13,7 @@ use Artwallet\VaultRbac\Models\AuditEvent;
 final readonly class AuditRecord
 {
     /**
-     * @param  array<string, mixed>  $payload  Stored as JSON diff on {@see AuditEvent}.
+     * @param  array<string, mixed>  $payload  Stored as JSON diff on {@see AuditLog}.
      */
     public function __construct(
         public string $action,

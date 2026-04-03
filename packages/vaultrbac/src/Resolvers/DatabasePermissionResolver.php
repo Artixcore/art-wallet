@@ -9,6 +9,8 @@ use Artwallet\VaultRbac\Contracts\AuthorizationRepository;
 use Artwallet\VaultRbac\Contracts\PermissionResolverInterface;
 use Artwallet\VaultRbac\Contracts\RoleHierarchyProvider;
 use Artwallet\VaultRbac\Contracts\SuperUserGuard;
+use Artwallet\VaultRbac\Enums\PermissionEffect;
+use Artwallet\VaultRbac\Enums\RoleStatus;
 use Artwallet\VaultRbac\Models\Role;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Config;
@@ -68,7 +70,7 @@ final class DatabasePermissionResolver implements PermissionResolverInterface
             if (! isset($idSet[$pid])) {
                 continue;
             }
-            if ($assignment->effect === 'deny') {
+            if ($assignment->effect === PermissionEffect::Deny) {
                 return false;
             }
         }
@@ -78,7 +80,7 @@ final class DatabasePermissionResolver implements PermissionResolverInterface
             if (! isset($idSet[$pid])) {
                 continue;
             }
-            if ($assignment->effect === 'allow') {
+            if ($assignment->effect === PermissionEffect::Allow) {
                 return true;
             }
         }
@@ -114,7 +116,7 @@ final class DatabasePermissionResolver implements PermissionResolverInterface
             if (! $role instanceof Role) {
                 continue;
             }
-            if ($role->activation_state !== 'active') {
+            if ($role->activation_state !== RoleStatus::Active) {
                 continue;
             }
             if ($role->tenant_id !== null && (string) $role->tenant_id !== (string) $tenantId) {
@@ -135,7 +137,7 @@ final class DatabasePermissionResolver implements PermissionResolverInterface
 
         return $roleClass::query()
             ->whereIn('id', $unique)
-            ->where('activation_state', 'active')
+            ->where('activation_state', RoleStatus::Active->value)
             ->where(function ($query) use ($tenantId): void {
                 $query->whereNull('tenant_id')->orWhere('tenant_id', $tenantId);
             })

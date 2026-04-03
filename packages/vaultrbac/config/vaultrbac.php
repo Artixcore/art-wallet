@@ -8,7 +8,27 @@ use Artwallet\VaultRbac\Context\DefaultAuthorizationContextFactory;
 use Artwallet\VaultRbac\Hierarchy\EloquentRoleHierarchyProvider;
 use Artwallet\VaultRbac\Models\Permission;
 use Artwallet\VaultRbac\Models\Role;
+use Artwallet\VaultRbac\Contracts\ApprovalRequestRepository;
+use Artwallet\VaultRbac\Contracts\AuditLogRepository;
+use Artwallet\VaultRbac\Contracts\EncryptedMetadataRepository;
+use Artwallet\VaultRbac\Contracts\HierarchyRepository;
+use Artwallet\VaultRbac\Contracts\PermissionAssignmentRepository;
+use Artwallet\VaultRbac\Contracts\PermissionCacheVersionRepository;
+use Artwallet\VaultRbac\Contracts\PermissionRepository;
+use Artwallet\VaultRbac\Contracts\RoleAssignmentRepository;
+use Artwallet\VaultRbac\Contracts\RoleRepository;
+use Artwallet\VaultRbac\Contracts\TenantRepository;
+use Artwallet\VaultRbac\Repositories\EloquentApprovalRequestRepository;
+use Artwallet\VaultRbac\Repositories\EloquentAuditLogRepository;
 use Artwallet\VaultRbac\Repositories\EloquentAuthorizationRepository;
+use Artwallet\VaultRbac\Repositories\EloquentEncryptedMetadataRepository;
+use Artwallet\VaultRbac\Repositories\EloquentHierarchyRepository;
+use Artwallet\VaultRbac\Repositories\EloquentPermissionAssignmentRepository;
+use Artwallet\VaultRbac\Repositories\EloquentPermissionCacheVersionRepository;
+use Artwallet\VaultRbac\Repositories\EloquentPermissionRepository;
+use Artwallet\VaultRbac\Repositories\EloquentRoleAssignmentRepository;
+use Artwallet\VaultRbac\Repositories\EloquentRoleRepository;
+use Artwallet\VaultRbac\Repositories\EloquentTenantRepository;
 use Artwallet\VaultRbac\Resolvers\DatabasePermissionResolver;
 use Artwallet\VaultRbac\Security\NullSuperUserGuard;
 use Artwallet\VaultRbac\Services\ApprovalWorkflowService;
@@ -250,6 +270,16 @@ return [
         'assignment_service' => AssignmentService::class,
         'approval_workflow' => ApprovalWorkflowService::class,
         'tenant_membership_verifier' => AssignmentBackedTenantMembershipVerifier::class,
+        'role_repository' => EloquentRoleRepository::class,
+        'permission_repository' => EloquentPermissionRepository::class,
+        'tenant_repository' => EloquentTenantRepository::class,
+        'approval_request_repository' => EloquentApprovalRequestRepository::class,
+        'audit_log_repository' => EloquentAuditLogRepository::class,
+        'encrypted_metadata_repository' => EloquentEncryptedMetadataRepository::class,
+        'permission_cache_version_repository' => EloquentPermissionCacheVersionRepository::class,
+        'role_assignment_repository' => EloquentRoleAssignmentRepository::class,
+        'permission_assignment_repository' => EloquentPermissionAssignmentRepository::class,
+        'hierarchy_repository' => EloquentHierarchyRepository::class,
     ],
 
     /*

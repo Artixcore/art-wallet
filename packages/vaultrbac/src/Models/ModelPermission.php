@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Artwallet\VaultRbac\Models;
 
 use Artwallet\VaultRbac\Casts\MaybeEncryptedJson;
+use Artwallet\VaultRbac\Enums\PermissionEffect;
 use Artwallet\VaultRbac\Models\Concerns\MapsVaultRbacTable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -38,6 +39,7 @@ class ModelPermission extends Model
     protected function casts(): array
     {
         return [
+            'effect' => PermissionEffect::class,
             'assigned_at' => 'datetime',
             'expires_at' => 'datetime',
             'suspended_at' => 'datetime',

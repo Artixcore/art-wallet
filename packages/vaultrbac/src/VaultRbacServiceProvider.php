@@ -8,17 +8,27 @@ use Artwallet\VaultRbac\Audit\DatabaseAuditSink;
 use Artwallet\VaultRbac\Audit\NullAuditSink;
 use Artwallet\VaultRbac\Console\DoctorCommand;
 use Artwallet\VaultRbac\Console\SyncPermissionsCommand;
+use Artwallet\VaultRbac\Contracts\ApprovalRequestRepository;
 use Artwallet\VaultRbac\Contracts\ApprovalWorkflowInterface;
 use Artwallet\VaultRbac\Contracts\AssignmentServiceInterface;
+use Artwallet\VaultRbac\Contracts\AuditLogRepository;
 use Artwallet\VaultRbac\Contracts\AuditSink;
 use Artwallet\VaultRbac\Contracts\AuthorizationContextFactory;
 use Artwallet\VaultRbac\Contracts\AuthorizationRepository;
 use Artwallet\VaultRbac\Contracts\CacheInvalidator;
+use Artwallet\VaultRbac\Contracts\EncryptedMetadataRepository;
+use Artwallet\VaultRbac\Contracts\HierarchyRepository;
+use Artwallet\VaultRbac\Contracts\PermissionAssignmentRepository;
+use Artwallet\VaultRbac\Contracts\PermissionCacheVersionRepository;
+use Artwallet\VaultRbac\Contracts\PermissionRepository;
 use Artwallet\VaultRbac\Contracts\PermissionResolverInterface;
+use Artwallet\VaultRbac\Contracts\RoleAssignmentRepository;
 use Artwallet\VaultRbac\Contracts\RoleHierarchyProvider;
+use Artwallet\VaultRbac\Contracts\RoleRepository;
 use Artwallet\VaultRbac\Contracts\SuperUserGuard;
 use Artwallet\VaultRbac\Contracts\TeamResolver;
 use Artwallet\VaultRbac\Contracts\TenantMembershipVerifier;
+use Artwallet\VaultRbac\Contracts\TenantRepository;
 use Artwallet\VaultRbac\Contracts\TenantResolver;
 use Artwallet\VaultRbac\Database\BlueprintMacros;
 use Artwallet\VaultRbac\Events\PermissionGranted;
@@ -116,6 +126,16 @@ final class VaultRbacServiceProvider extends ServiceProvider
         $this->bindConcrete($app, AssignmentServiceInterface::class, $bindings['assignment_service'] ?? null);
         $this->bindConcrete($app, ApprovalWorkflowInterface::class, $bindings['approval_workflow'] ?? null);
         $this->bindConcrete($app, TenantMembershipVerifier::class, $bindings['tenant_membership_verifier'] ?? null);
+        $this->bindConcrete($app, RoleRepository::class, $bindings['role_repository'] ?? null);
+        $this->bindConcrete($app, PermissionRepository::class, $bindings['permission_repository'] ?? null);
+        $this->bindConcrete($app, TenantRepository::class, $bindings['tenant_repository'] ?? null);
+        $this->bindConcrete($app, ApprovalRequestRepository::class, $bindings['approval_request_repository'] ?? null);
+        $this->bindConcrete($app, AuditLogRepository::class, $bindings['audit_log_repository'] ?? null);
+        $this->bindConcrete($app, EncryptedMetadataRepository::class, $bindings['encrypted_metadata_repository'] ?? null);
+        $this->bindConcrete($app, PermissionCacheVersionRepository::class, $bindings['permission_cache_version_repository'] ?? null);
+        $this->bindConcrete($app, RoleAssignmentRepository::class, $bindings['role_assignment_repository'] ?? null);
+        $this->bindConcrete($app, PermissionAssignmentRepository::class, $bindings['permission_assignment_repository'] ?? null);
+        $this->bindConcrete($app, HierarchyRepository::class, $bindings['hierarchy_repository'] ?? null);
 
         $app->singleton(VaultRbac::class, static function (Application $app): VaultRbac {
             return new VaultRbac(

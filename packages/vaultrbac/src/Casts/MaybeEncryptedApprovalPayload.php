@@ -17,11 +17,11 @@ use function json_decode;
 use function json_encode;
 
 /**
- * JSON metadata stored as plaintext JSON or Laravel-encrypted ciphertext (Phase 5).
+ * Approval {@code payload} column (longText): plaintext JSON or Laravel-encrypted ciphertext.
  *
  * @implements CastsAttributes<array<string, mixed>|null, array<string, mixed>|null>
  */
-final class MaybeEncryptedJson implements CastsAttributes
+final class MaybeEncryptedApprovalPayload implements CastsAttributes
 {
     public function get(Model $model, string $key, mixed $value, array $attributes): ?array
     {
@@ -29,37 +29,42 @@ final class MaybeEncryptedJson implements CastsAttributes
             return null;
         }
 
-        if (! $this->enabled()) {
-            try {
-                return json_decode((string) $value, true, 512, JSON_THROW_ON_ERROR);
-            } catch (\JsonException $e) {
-                throw new InvalidEncryptedPayloadException(
-                    sprintf('Invalid JSON for [%s] on [%s].', $key, $model::class),
-                    0,
-                    $e,
-                );
-            }
+        if (! $this->encrypt()) {
+            return $this->decodeJson((string) $value, $key, $model);
         }
 
         try {
             $plain = $this->encrypter()->decryptString((string) $value);
-        } catch (DecryptException $e) {
+        } catch (DecryptException) {
+            // Legacy rows may store plaintext JSON when encryption was disabled.
+            $plain = (string) $value;
+        }
+
+        return $this->decodeJson($plain, $key, $model);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function decodeJson(string $plain, string $key, Model $model): array
+    {
+        try {
+            $decoded = json_decode($plain, true, 512, JSON_THROW_ON_ERROR);
+        } catch (\JsonException $e) {
             throw new InvalidEncryptedPayloadException(
-                sprintf('Unable to decrypt [%s] on [%s].', $key, $model::class),
+                sprintf('Invalid JSON for [%s] on [%s].', $key, $model::class),
                 0,
                 $e,
             );
         }
 
-        try {
-            return json_decode($plain, true, 512, JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
+        if (! is_array($decoded)) {
             throw new InvalidEncryptedPayloadException(
-                sprintf('Invalid JSON after decrypt for [%s] on [%s].', $key, $model::class),
-                0,
-                $e,
+                sprintf('[%s] on [%s] must decode to an object or array.', $key, $model::class),
             );
         }
+
+        return $decoded;
     }
 
     public function set(Model $model, string $key, mixed $value, array $attributes): array
@@ -72,16 +77,18 @@ final class MaybeEncryptedJson implements CastsAttributes
             throw new InvalidEncryptedPayloadException(sprintf('[%s] must be an array or null.', $key));
         }
 
-        if (! $this->enabled()) {
-            return [$key => json_encode($value, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES)];
+        $json = json_encode($value, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES);
+
+        if (! $this->encrypt()) {
+            return [$key => $json];
         }
 
-        return [$key => $this->encrypter()->encryptString(json_encode($value, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES))];
+        return [$key => $this->encrypter()->encryptString($json)];
     }
 
-    private function enabled(): bool
+    private function encrypt(): bool
     {
-        return (bool) app(ConfigRepository::class)->get('vaultrbac.encryption.metadata.enabled', false);
+        return (bool) app(ConfigRepository::class)->get('vaultrbac.encryption.approvals.encrypt_payload', true);
     }
 
     private function encrypter(): Encrypter

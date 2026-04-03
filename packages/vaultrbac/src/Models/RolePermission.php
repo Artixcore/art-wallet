@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Artwallet\VaultRbac\Models;
 
 use Artwallet\VaultRbac\Database\VaultrbacTables;
+use Artwallet\VaultRbac\Enums\AssignmentSource;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
@@ -17,6 +18,7 @@ class RolePermission extends Pivot
         return [
             'granted_at' => 'datetime',
             'expires_at' => 'datetime',
+            'source' => AssignmentSource::class,
         ];
     }
 
