@@ -33,6 +33,8 @@ use Artwallet\VaultRbac\Resolvers\DatabasePermissionResolver;
 use Artwallet\VaultRbac\Security\NullSuperUserGuard;
 use Artwallet\VaultRbac\Services\ApprovalWorkflowService;
 use Artwallet\VaultRbac\Services\AssignmentService;
+use Artwallet\VaultRbac\Services\PermissionCacheAdminService;
+use Artwallet\VaultRbac\Services\TemporaryGrantService;
 use Artwallet\VaultRbac\Tenancy\AssignmentBackedTenantMembershipVerifier;
 use Artwallet\VaultRbac\Tenancy\CompositeTeamResolver;
 use Artwallet\VaultRbac\Tenancy\CompositeTenantResolver;
@@ -243,6 +245,19 @@ return [
     'helpers' => [
         'enabled' => env('VAULTRBAC_HELPERS_ENABLED', false),
         'strict_context' => env('VAULTRBAC_HELPERS_STRICT_CONTEXT', false),
+        'rbac_aliases_enabled' => env('VAULTRBAC_HELPERS_RBAC_ALIASES_ENABLED', false),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Permission cache admin (warm / flush)
+    |--------------------------------------------------------------------------
+    */
+
+    'cache_admin' => [
+        'warm_ttl_seconds' => (int) env('VAULTRBAC_CACHE_WARM_TTL', 3600),
+        'assignment_subject_type' => env('VAULTRBAC_CACHE_ASSIGNMENT_SCOPE', 'assignment'),
+        'throw_on_error' => env('VAULTRBAC_CACHE_ADMIN_THROW', false),
     ],
 
     /*
@@ -330,6 +345,8 @@ return [
         'cache_invalidator' => NullCacheInvalidator::class,
         'super_user_guard' => NullSuperUserGuard::class,
         'assignment_service' => AssignmentService::class,
+        'permission_cache_admin' => PermissionCacheAdminService::class,
+        'temporary_grant_service' => TemporaryGrantService::class,
         'approval_workflow' => ApprovalWorkflowService::class,
         'tenant_membership_verifier' => AssignmentBackedTenantMembershipVerifier::class,
         'role_repository' => EloquentRoleRepository::class,

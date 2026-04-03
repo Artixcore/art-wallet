@@ -223,6 +223,70 @@ final class AssignmentService implements AssignmentServiceInterface
         $this->bumpCache($tenantId, $model);
     }
 
+    public function syncPermissions(
+        Model $model,
+        array $permissions,
+        string|int $tenantId,
+        string|int|null $teamId = null,
+        string|int|null $assignedBy = null,
+    ): void {
+        $resolved = [];
+        foreach ($permissions as $permission) {
+            $permissionModel = $this->resolvePermission($permission, $tenantId);
+            $resolved[(string) $permissionModel->getKey()] = $permissionModel;
+        }
+
+        $wantedIds = array_keys($resolved);
+
+        DB::transaction(function () use ($model, $tenantId, $teamId, $assignedBy, $resolved, $wantedIds): void {
+            $this->lockAssignmentsFor($model, $tenantId, $teamId, false);
+
+            $query = ModelPermission::query()
+                ->where('tenant_id', $tenantId)
+                ->where('model_type', $model->getMorphClass())
+                ->where('model_id', $model->getKey())
+                ->where('team_key', $teamId !== null ? (int) $teamId : 0)
+                ->where('effect', 'allow');
+
+            $existing = $query->get();
+            $existingIds = $existing->pluck('permission_id')->map(static fn ($id): string => (string) $id)->all();
+
+            foreach ($existing as $row) {
+                $pid = (string) $row->permission_id;
+                if (in_array($pid, $wantedIds, true)) {
+                    continue;
+                }
+
+                $removed = $this->permissionClass()::query()->find($row->permission_id);
+                $row->delete();
+                if ($removed instanceof Permission) {
+                    Event::dispatch(new PermissionRevoked($model, $removed, $tenantId, $teamId, 'allow'));
+                }
+            }
+
+            foreach ($wantedIds as $id) {
+                if (in_array($id, $existingIds, true)) {
+                    continue;
+                }
+                $permissionModel = $resolved[$id];
+                $assignment = ModelPermission::query()->create([
+                    'tenant_id' => $tenantId,
+                    'team_id' => $teamId,
+                    'team_key' => $teamId !== null ? (int) $teamId : 0,
+                    'permission_id' => $permissionModel->getKey(),
+                    'model_type' => $model->getMorphClass(),
+                    'model_id' => $model->getKey(),
+                    'effect' => 'allow',
+                    'assigned_by' => $assignedBy,
+                    'assigned_at' => now(),
+                ]);
+                Event::dispatch(new PermissionGranted($model, $permissionModel, $tenantId, $teamId, 'allow', $assignment));
+            }
+        });
+
+        $this->bumpCache($tenantId, $model);
+    }
+
     private function lockAssignmentsFor(
         Model $model,
         string|int $tenantId,

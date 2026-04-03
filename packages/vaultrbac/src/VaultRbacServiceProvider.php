@@ -19,6 +19,7 @@ use Artwallet\VaultRbac\Contracts\CacheInvalidator;
 use Artwallet\VaultRbac\Contracts\EncryptedMetadataRepository;
 use Artwallet\VaultRbac\Contracts\HierarchyRepository;
 use Artwallet\VaultRbac\Contracts\PermissionAssignmentRepository;
+use Artwallet\VaultRbac\Contracts\PermissionCacheAdminInterface;
 use Artwallet\VaultRbac\Contracts\PermissionCacheVersionRepository;
 use Artwallet\VaultRbac\Contracts\PermissionRepository;
 use Artwallet\VaultRbac\Contracts\PermissionResolverInterface;
@@ -29,6 +30,7 @@ use Artwallet\VaultRbac\Contracts\SuperUserGuard;
 use Artwallet\VaultRbac\Contracts\TeamResolver;
 use Artwallet\VaultRbac\Contracts\TenantMembershipVerifier;
 use Artwallet\VaultRbac\Contracts\TenantRepository;
+use Artwallet\VaultRbac\Contracts\TemporaryGrantServiceInterface;
 use Artwallet\VaultRbac\Contracts\TenantResolver;
 use Artwallet\VaultRbac\Database\BlueprintMacros;
 use Artwallet\VaultRbac\Events\PermissionGranted;
@@ -57,6 +59,7 @@ use Artwallet\VaultRbac\Resolvers\SafePermissionResolver;
 use Artwallet\VaultRbac\Support\RequestAuthorization;
 use Artwallet\VaultRbac\Tenancy\RequestSourceReader;
 use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Contracts\Cache\Factory as CacheFactory;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use Illuminate\Log\LogManager;
 use Illuminate\Contracts\Foundation\Application;
@@ -159,6 +162,8 @@ final class VaultRbacServiceProvider extends ServiceProvider
         $this->bindConcrete($app, CacheInvalidator::class, $bindings['cache_invalidator'] ?? null);
         $this->bindConcrete($app, SuperUserGuard::class, $bindings['super_user_guard'] ?? null);
         $this->bindConcrete($app, AssignmentServiceInterface::class, $bindings['assignment_service'] ?? null);
+        $this->registerPermissionCacheAdminBinding($app, $bindings, (string) ($bindings['permission_cache_admin'] ?? \Artwallet\VaultRbac\Services\PermissionCacheAdminService::class));
+        $this->bindConcrete($app, TemporaryGrantServiceInterface::class, $bindings['temporary_grant_service'] ?? null);
         $this->bindConcrete($app, ApprovalWorkflowInterface::class, $bindings['approval_workflow'] ?? null);
         $this->bindConcrete($app, TenantMembershipVerifier::class, $bindings['tenant_membership_verifier'] ?? null);
         $this->bindConcrete($app, RoleRepository::class, $bindings['role_repository'] ?? null);
@@ -179,8 +184,49 @@ final class VaultRbacServiceProvider extends ServiceProvider
                 $app->make(AssignmentServiceInterface::class),
                 $app->make(AuthorizationRepository::class),
                 $app->make(ConfigRepository::class),
+                $app->make(ApprovalWorkflowInterface::class),
+                $app->make(AuditLogRepository::class),
+                $app->make(PermissionCacheAdminInterface::class),
+                $app->make(TemporaryGrantServiceInterface::class),
+                $app->make(PermissionCacheVersionRepository::class),
             );
         });
+    }
+
+    /**
+     * @param  array<string, mixed>  $bindings
+     */
+    private function registerPermissionCacheAdminBinding(Application $app, array $bindings, string $implementation): void
+    {
+        if ($implementation === '') {
+            throw new ConfigurationException(
+                'vaultrbac.bindings mapping for [Artwallet\\VaultRbac\\Contracts\\PermissionCacheAdminInterface] is missing or empty.',
+            );
+        }
+
+        $app->singleton(PermissionCacheAdminInterface::class, static function (Application $app) use ($implementation): PermissionCacheAdminInterface {
+            $instance = $app->make($implementation);
+            if (! $instance instanceof PermissionCacheAdminInterface) {
+                throw new ConfigurationException(
+                    sprintf('vaultrbac.bindings.permission_cache_admin must implement PermissionCacheAdminInterface, [%s] given.', $implementation),
+                );
+            }
+
+            return $instance;
+        });
+
+        $app->when($implementation)
+            ->needs(\Illuminate\Contracts\Cache\Repository::class)
+            ->give(static function (Application $app): \Illuminate\Contracts\Cache\Repository {
+                $store = $app->make('config')->get('vaultrbac.cache.store');
+
+                /** @var CacheFactory $factory */
+                $factory = $app->make(CacheFactory::class);
+
+                return ($store !== null && $store !== '')
+                    ? $factory->store((string) $store)
+                    : $factory->store();
+            });
     }
 
     private function registerVaultGate(): void

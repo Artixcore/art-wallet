@@ -4,58 +4,27 @@ declare(strict_types=1);
 
 namespace Artwallet\VaultRbac\Console;
 
-use Artwallet\VaultRbac\Database\VaultrbacTables;
 use Illuminate\Console\Command;
-use Illuminate\Contracts\Config\Repository as ConfigRepository;
-use Illuminate\Support\Facades\Schema;
-use Throwable;
 
+/**
+ * Backwards-compatible entry point; delegates to {@see DiagnoseCommand}.
+ */
 final class DoctorCommand extends Command
 {
-    protected $signature = 'vaultrbac:doctor';
+    protected $signature = 'vaultrbac:doctor {--tenant=} {--json}';
 
-    protected $description = 'Validate VaultRBAC configuration and required database tables';
+    protected $description = 'Alias for vaultrbac:diagnose';
 
-    public function handle(ConfigRepository $config): int
+    public function handle(): int
     {
-        $this->info('VaultRBAC doctor');
-
-        $ok = true;
-
-        try {
-            VaultrbacTables::name('tenants');
-        } catch (Throwable $e) {
-            $this->error('Invalid table map: '.$e->getMessage());
-            $ok = false;
+        $options = [];
+        if ($this->option('tenant') !== null) {
+            $options['--tenant'] = $this->option('tenant');
+        }
+        if ($this->option('json')) {
+            $options['--json'] = true;
         }
 
-        $tables = (array) $config->get('vaultrbac.tables', []);
-        foreach ($tables as $key => $table) {
-            if (! is_string($table) || $table === '') {
-                $this->warn("Table key [{$key}] is empty.");
-                $ok = false;
-
-                continue;
-            }
-
-            if (! Schema::hasTable($table)) {
-                $this->error("Missing table [{$table}] (config key vaultrbac.tables.{$key}).");
-                $ok = false;
-            } else {
-                $this->line("OK  {$table}");
-            }
-        }
-
-        $appKey = $config->get('app.key');
-        if (! is_string($appKey) || $appKey === '') {
-            $this->error('APP_KEY is not set.');
-            $ok = false;
-        }
-
-        if ($config->get('vaultrbac.audit.enabled') && ! is_string($config->get('vaultrbac.audit.secret')) && (! is_string($appKey) || $appKey === '')) {
-            $this->warn('Audit is enabled but vaultrbac.audit.secret is empty; ensure APP_KEY is set for DatabaseAuditSink.');
-        }
-
-        return $ok ? self::SUCCESS : self::FAILURE;
+        return $this->call('vaultrbac:diagnose', $options);
     }
 }
