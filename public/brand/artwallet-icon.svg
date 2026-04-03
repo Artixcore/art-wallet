@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="ArtWallet">
+  <defs>
+    <linearGradient id="aw-shield" x1="128" y1="8" x2="128" y2="244" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#152238"/>
+      <stop offset="100%" stop-color="#070b12"/>
+    </linearGradient>
+    <linearGradient id="aw-gold" x1="88" y1="72" x2="168" y2="168" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#e8d5a8"/>
+      <stop offset="45%" stop-color="#c9a227"/>
+      <stop offset="100%" stop-color="#8b6914"/>
+    </linearGradient>
+    <linearGradient id="aw-neon" x1="36" y1="128" x2="220" y2="128" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#22d3ee" stop-opacity="0"/>
+      <stop offset="50%" stop-color="#5eead4" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#22d3ee" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <!-- Subtle outer ring / token hint -->
+  <circle cx="128" cy="128" r="118" fill="none" stroke="url(#aw-neon)" stroke-width="1.25" opacity="0.9"/>
+  <circle cx="128" cy="128" r="108" fill="none" stroke="#0f766e" stroke-opacity="0.35" stroke-width="0.75"/>
+  <!-- Shield body (symmetric) -->
+  <path fill="url(#aw-shield)" stroke="url(#aw-gold)" stroke-width="2.5" stroke-linejoin="round"
+    d="M128 12 L210 44 L210 118 C210 172 176 212 128 248 C80 212 46 172 46 118 L46 44 Z"/>
+  <!-- Inner wallet card slot (symmetric) -->
+  <path fill="#0a0f18" stroke="#1e3a5f" stroke-width="1.5" stroke-linejoin="round"
+    d="M72 132 H184 V188 Q184 198 176 204 H80 Q72 198 72 188 Z"/>
+  <path fill="none" stroke="#2d4a6f" stroke-width="2" stroke-linecap="round"
+    d="M76 148 H180"/>
+  <!-- Wallet flap curve -->
+  <path fill="none" stroke="url(#aw-gold)" stroke-width="2" stroke-linecap="round"
+    d="M88 132 Q128 108 168 132"/>
+  <!-- Lock shackle -->
+  <path fill="none" stroke="url(#aw-gold)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"
+    d="M104 96 V84 Q104 64 128 64 Q152 64 152 84 V96"/>
+  <!-- Lock body -->
+  <rect x="98" y="94" width="60" height="48" rx="8" fill="#0c1220" stroke="url(#aw-gold)" stroke-width="2"/>
+  <circle cx="128" cy="116" r="6" fill="none" stroke="#c9a227" stroke-width="2"/>
+  <path fill="none" stroke="#c9a227" stroke-width="2" stroke-linecap="round" d="M128 122 V130"/>
+  <!-- Geometric coin / hex token (minimal) -->
+  <path fill="none" stroke="#c9a227" stroke-width="1.5" stroke-linejoin="round" opacity="0.85"
+    d="M128 52 L140 59 V73 L128 80 L116 73 V59 Z"/>
+  <!-- Blockchain node trio (subtle) -->
+  <g fill="#10b981" opacity="0.9">
+    <circle cx="58" cy="168" r="4"/>
+    <circle cx="198" cy="168" r="4"/>
+    <circle cx="128" cy="198" r="4.5"/>
+  </g>
+  <path fill="none" stroke="#0d9488" stroke-width="1" stroke-linecap="round" opacity="0.5"
+    d="M62 168 L124 194 M194 168 L132 194"/>
+  <!-- Emerald trust accent -->
+  <circle cx="128" cy="224" r="5" fill="#059669" stroke="#34d399" stroke-width="1" opacity="0.95"/>
+</svg>
