@@ -44,6 +44,7 @@ final class SyncPermissionsCommand extends Command
         $tenantId = $global ? null : $tenant;
 
         $created = 0;
+        $processed = 0;
         foreach ($permissions as $item) {
             if (is_string($item)) {
                 $name = $item;
@@ -57,6 +58,8 @@ final class SyncPermissionsCommand extends Command
 
                 continue;
             }
+
+            $processed++;
 
             $row = Permission::query()->firstOrCreate(
                 [
@@ -73,7 +76,7 @@ final class SyncPermissionsCommand extends Command
             }
         }
 
-        $this->info(sprintf('Synced %d permission definition(s); %d newly created.', count($permissions), $created));
+        $this->info(sprintf('Synced %d permission definition(s); %d newly created.', $processed, $created));
 
         return self::SUCCESS;
     }

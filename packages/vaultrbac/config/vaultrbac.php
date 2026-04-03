@@ -131,6 +131,48 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Laravel Gate (Phase 6)
+    |--------------------------------------------------------------------------
+    |
+    | Registers Gate::define(ability) so policies and @can-style checks can
+    | delegate to VaultRBAC: Gate::forUser($user)->allows($ability, [$name, $resource]).
+    |
+    */
+
+    'gate' => [
+        'enabled' => env('VAULTRBAC_GATE_ENABLED', true),
+        'ability' => env('VAULTRBAC_GATE_ABILITY', 'vaultrbac'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Blade conditionals (Phase 6)
+    |--------------------------------------------------------------------------
+    |
+    | @vaultcan('permission.name', $optionalModel) and @vaultrole('role-name').
+    |
+    */
+
+    'blade' => [
+        'enabled' => env('VAULTRBAC_BLADE_ENABLED', true),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Sync permissions from config (Phase 6)
+    |--------------------------------------------------------------------------
+    |
+    | Consumed by `php artisan vaultrbac:sync-permissions --tenant=` or --global.
+    | Each entry is a permission name string or an array with a `name` key.
+    |
+    */
+
+    'sync' => [
+        'permissions' => [],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Audit (Phase 5)
     |--------------------------------------------------------------------------
     */
