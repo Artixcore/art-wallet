@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Artwallet\VaultRbac\Models;
 
+use Artwallet\VaultRbac\Casts\MaybeEncryptedJson;
 use Artwallet\VaultRbac\Database\VaultrbacTables;
 use Artwallet\VaultRbac\Models\Concerns\MapsVaultRbacTable;
 use Illuminate\Database\Eloquent\Model;
@@ -32,7 +33,7 @@ class Permission extends Model
     {
         return [
             'is_wildcard_parent' => 'boolean',
-            'metadata' => 'array',
+            'metadata' => MaybeEncryptedJson::class,
         ];
     }
 

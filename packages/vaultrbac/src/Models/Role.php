@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Artwallet\VaultRbac\Models;
 
+use Artwallet\VaultRbac\Casts\MaybeEncryptedJson;
 use Artwallet\VaultRbac\Database\VaultrbacTables;
 use Artwallet\VaultRbac\Models\Concerns\MapsVaultRbacTable;
 use Illuminate\Database\Eloquent\Model;
@@ -36,7 +37,7 @@ class Role extends Model
     {
         return [
             'is_system' => 'boolean',
-            'metadata' => 'array',
+            'metadata' => MaybeEncryptedJson::class,
         ];
     }
 

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Artwallet\VaultRbac\Audit\NullAuditSink;
+use Artwallet\VaultRbac\Audit\DatabaseAuditSink;
 use Artwallet\VaultRbac\Cache\NullCacheInvalidator;
 use Artwallet\VaultRbac\Context\DefaultAuthorizationContextFactory;
 use Artwallet\VaultRbac\Hierarchy\EloquentRoleHierarchyProvider;
@@ -11,6 +11,7 @@ use Artwallet\VaultRbac\Models\Role;
 use Artwallet\VaultRbac\Repositories\EloquentAuthorizationRepository;
 use Artwallet\VaultRbac\Resolvers\DatabasePermissionResolver;
 use Artwallet\VaultRbac\Security\NullSuperUserGuard;
+use Artwallet\VaultRbac\Services\ApprovalWorkflowService;
 use Artwallet\VaultRbac\Services\AssignmentService;
 use Artwallet\VaultRbac\Tenancy\AssignmentBackedTenantMembershipVerifier;
 use Artwallet\VaultRbac\Tenancy\CompositeTeamResolver;
@@ -130,6 +131,35 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Audit (Phase 5)
+    |--------------------------------------------------------------------------
+    */
+
+    'audit' => [
+        'enabled' => env('VAULTRBAC_AUDIT_ENABLED', true),
+        'genesis_prev_hash' => env('VAULTRBAC_AUDIT_GENESIS', 'genesis'),
+        'register_listeners' => env('VAULTRBAC_AUDIT_LISTENERS', true),
+        'secret' => env('VAULTRBAC_AUDIT_SECRET'),
+        'sign_rows' => env('VAULTRBAC_AUDIT_SIGN_ROWS', true),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Encryption (Phase 5)
+    |--------------------------------------------------------------------------
+    */
+
+    'encryption' => [
+        'metadata' => [
+            'enabled' => env('VAULTRBAC_ENCRYPT_METADATA', false),
+        ],
+        'approvals' => [
+            'encrypt_payload' => env('VAULTRBAC_ENCRYPT_APPROVAL_PAYLOAD', true),
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Concrete binding classes
     |--------------------------------------------------------------------------
     */
@@ -141,10 +171,11 @@ return [
         'authorization_repository' => EloquentAuthorizationRepository::class,
         'permission_resolver' => DatabasePermissionResolver::class,
         'role_hierarchy_provider' => EloquentRoleHierarchyProvider::class,
-        'audit_sink' => NullAuditSink::class,
+        'audit_sink' => DatabaseAuditSink::class,
         'cache_invalidator' => NullCacheInvalidator::class,
         'super_user_guard' => NullSuperUserGuard::class,
         'assignment_service' => AssignmentService::class,
+        'approval_workflow' => ApprovalWorkflowService::class,
         'tenant_membership_verifier' => AssignmentBackedTenantMembershipVerifier::class,
     ],
 
