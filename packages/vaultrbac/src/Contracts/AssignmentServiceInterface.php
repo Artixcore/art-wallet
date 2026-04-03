@@ -52,4 +52,20 @@ interface AssignmentServiceInterface
         string|int|null $teamId = null,
         ?string $effect = null,
     ): void;
+
+    /**
+     * Replace direct **allow** model-permissions for the tenant/team slice with the given set.
+     * Deny-effect rows are left unchanged.
+     *
+     * @param  list<Permission|string|int>  $permissions
+     *
+     * @throws \Artwallet\VaultRbac\Exceptions\InvalidAssignmentException
+     */
+    public function syncPermissions(
+        Model $model,
+        array $permissions,
+        string|int $tenantId,
+        string|int|null $teamId = null,
+        string|int|null $assignedBy = null,
+    ): void;
 }
