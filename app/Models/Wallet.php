@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Wallet extends Model
 {
@@ -32,5 +33,21 @@ class Wallet extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * @return HasMany<WalletAddress, $this>
+     */
+    public function walletAddresses(): HasMany
+    {
+        return $this->hasMany(WalletAddress::class);
+    }
+
+    /**
+     * @return HasMany<TransactionIntent, $this>
+     */
+    public function transactionIntents(): HasMany
+    {
+        return $this->hasMany(TransactionIntent::class);
     }
 }

@@ -2,6 +2,11 @@
 
 namespace App\Providers;
 
+use App\Domain\Chain\Adapters\BitcoinAdapter;
+use App\Domain\Chain\Adapters\EthereumAdapter;
+use App\Domain\Chain\Adapters\SolanaAdapter;
+use App\Domain\Chain\Adapters\TronAdapter;
+use App\Domain\Chain\ChainAdapterResolver;
 use App\Listeners\RegisterUserSessionOnLogin;
 use App\Listeners\RevokeUserSessionOnLogout;
 use App\Rbac\ComparingPermissionResolver;
@@ -25,7 +30,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(ChainAdapterResolver::class, function ($app) {
+            return new ChainAdapterResolver([
+                $app->make(EthereumAdapter::class),
+                $app->make(BitcoinAdapter::class),
+                $app->make(SolanaAdapter::class),
+                $app->make(TronAdapter::class),
+            ]);
+        });
     }
 
     /**

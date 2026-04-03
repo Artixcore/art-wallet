@@ -4,15 +4,15 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8d13339c8393872ba8239a6a63bd4c33",
+    "content-hash": "5272b8b98d9526ef1f8fc984637e2abd",
     "packages": [
         {
             "name": "artixcore/artgate",
-            "version": "dev-main",
+            "version": "dev-master",
             "dist": {
                 "type": "path",
                 "url": "../artgate",
-                "reference": "6a5a8c889a117873757fb5885dc5dee148447dd0"
+                "reference": "57a424b54507bc8d0e000458c40fbb24c4c1339b"
             },
             "require": {
                 "illuminate/auth": "^11.0|^12.0|^13.0",
@@ -6089,6 +6089,50 @@
                 }
             ],
             "time": "2024-11-21T01:49:47+00:00"
+        },
+        {
+            "name": "web3p/rlp",
+            "version": "0.3.5",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/web3p/rlp.git",
+                "reference": "d35f84b32b9cfdf2ee326e7f4ed7f8a0cf6d2faa"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/web3p/rlp/zipball/d35f84b32b9cfdf2ee326e7f4ed7f8a0cf6d2faa",
+                "reference": "d35f84b32b9cfdf2ee326e7f4ed7f8a0cf6d2faa",
+                "shasum": ""
+            },
+            "require": {
+                "ext-mbstring": "*",
+                "php": "^7.1 | ^8.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~7|~8.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Web3p\\RLP\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "sc0Vu",
+                    "email": "alk03073135@gmail.com"
+                }
+            ],
+            "description": "Recursive Length Prefix Encoding in PHP.",
+            "support": {
+                "issues": "https://github.com/web3p/rlp/issues",
+                "source": "https://github.com/web3p/rlp/tree/0.3.5"
+            },
+            "time": "2022-04-27T06:14:33+00:00"
         }
     ],
     "packages-dev": [

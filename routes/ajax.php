@@ -10,7 +10,15 @@ use App\Http\Controllers\Api\RecoveryKitAjaxController;
 use App\Http\Controllers\Api\SecurityEventsAjaxController;
 use App\Http\Controllers\Api\SessionSecurityAjaxController;
 use App\Http\Controllers\Api\TrustedDeviceAjaxController;
+use App\Http\Controllers\Api\BroadcastAjaxController;
+use App\Http\Controllers\Api\FeeEstimateAjaxController;
+use App\Http\Controllers\Api\NetworkMetadataAjaxController;
+use App\Http\Controllers\Api\TransactionHistoryAjaxController;
+use App\Http\Controllers\Api\TransactionIntentAjaxController;
+use App\Http\Controllers\Api\WalletAddressAjaxController;
 use App\Http\Controllers\Api\WalletAjaxController;
+use App\Http\Controllers\Api\WalletListAjaxController;
+use App\Http\Controllers\Api\WalletVaultAjaxController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'verified', 'throttle:120,1'])->prefix('ajax')->group(function () {
@@ -19,6 +27,41 @@ Route::middleware(['auth', 'verified', 'throttle:120,1'])->prefix('ajax')->group
 
 Route::middleware(['auth', 'verified', 'throttle:12,1'])->prefix('ajax')->group(function () {
     Route::post('/wallets', [WalletAjaxController::class, 'store'])->name('ajax.wallets.store');
+});
+
+Route::middleware(['auth', 'verified', 'throttle:60,1'])->prefix('ajax')->group(function () {
+    Route::get('/networks', [NetworkMetadataAjaxController::class, 'index'])->name('ajax.networks.index');
+    Route::get('/wallets/list', [WalletListAjaxController::class, 'index'])->name('ajax.wallets.index');
+    Route::get('/wallets/{wallet}/vault', [WalletVaultAjaxController::class, 'show'])
+        ->whereNumber('wallet')
+        ->name('ajax.wallets.vault.show');
+    Route::get('/fee-estimates', [FeeEstimateAjaxController::class, 'show'])->name('ajax.fee-estimates.show');
+});
+
+Route::middleware(['auth', 'verified', 'throttle:30,1'])->prefix('ajax')->group(function () {
+    Route::post('/wallets/{wallet}/addresses', [WalletAddressAjaxController::class, 'sync'])
+        ->whereNumber('wallet')
+        ->name('ajax.wallets.addresses.sync');
+    Route::post('/wallets/{wallet}/transaction-intents', [TransactionIntentAjaxController::class, 'store'])
+        ->whereNumber('wallet')
+        ->middleware('throttle:20,1')
+        ->name('ajax.wallets.transaction-intents.store');
+    Route::get('/wallets/{wallet}/transaction-intents/{intent}', [TransactionIntentAjaxController::class, 'show'])
+        ->whereNumber('wallet')
+        ->whereNumber('intent')
+        ->name('ajax.wallets.transaction-intents.show');
+    Route::post('/wallets/{wallet}/transaction-intents/{intent}/broadcast', [BroadcastAjaxController::class, 'store'])
+        ->whereNumber('wallet')
+        ->whereNumber('intent')
+        ->middleware('throttle:12,1')
+        ->name('ajax.wallets.transaction-intents.broadcast');
+    Route::get('/wallets/{wallet}/blockchain-transactions', [TransactionHistoryAjaxController::class, 'index'])
+        ->whereNumber('wallet')
+        ->name('ajax.wallets.blockchain-transactions.index');
+    Route::get('/wallets/{wallet}/blockchain-transactions/{blockchain_transaction}', [TransactionHistoryAjaxController::class, 'show'])
+        ->whereNumber('wallet')
+        ->whereNumber('blockchain_transaction')
+        ->name('ajax.wallets.blockchain-transactions.show');
 });
 
 Route::middleware(['auth', 'verified', 'throttle:30,1'])->prefix('ajax')->group(function () {
