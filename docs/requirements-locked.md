@@ -2,6 +2,8 @@
 
 Decisions below align with the Phase 1 blueprint: BIP39 compatibility, network clarity, and separation of account auth from wallet encryption.
 
+Full cryptographic design reference: [crypto-architecture.md](./crypto-architecture.md).
+
 | Topic | Decision | Rationale |
 |-------|----------|-----------|
 | **Mnemonic length** | **24 words** (BIP39) | Interoperable with standard wallets; 20 words is non-BIP39 and breaks import/export expectations. |

@@ -44,6 +44,10 @@
                             class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-lg font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-25 transition ease-in-out duration-150">
                             {{ __('Decrypt') }}
                         </button>
+                        <button type="button" id="poc-save-wallet"
+                            class="inline-flex items-center px-4 py-2 bg-emerald-700 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
+                            {{ __('POST encrypted vault to server') }}
+                        </button>
                     </div>
                     <p id="poc-status" class="text-sm text-gray-600 dark:text-gray-400 min-h-[1.25rem]" role="status"></p>
                 </section>
