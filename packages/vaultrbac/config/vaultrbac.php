@@ -5,10 +5,16 @@ declare(strict_types=1);
 use Artwallet\VaultRbac\Audit\NullAuditSink;
 use Artwallet\VaultRbac\Cache\NullCacheInvalidator;
 use Artwallet\VaultRbac\Context\DefaultAuthorizationContextFactory;
-use Artwallet\VaultRbac\Hierarchy\NullRoleHierarchyProvider;
-use Artwallet\VaultRbac\Resolvers\DenyAllPermissionResolver;
+use Artwallet\VaultRbac\Hierarchy\EloquentRoleHierarchyProvider;
+use Artwallet\VaultRbac\Models\Permission;
+use Artwallet\VaultRbac\Models\Role;
+use Artwallet\VaultRbac\Repositories\EloquentAuthorizationRepository;
+use Artwallet\VaultRbac\Resolvers\DatabasePermissionResolver;
 use Artwallet\VaultRbac\Security\NullSuperUserGuard;
-use Artwallet\VaultRbac\Tenancy\NullTenantResolver;
+use Artwallet\VaultRbac\Services\AssignmentService;
+use Artwallet\VaultRbac\Tenancy\AssignmentBackedTenantMembershipVerifier;
+use Artwallet\VaultRbac\Tenancy\CompositeTeamResolver;
+use Artwallet\VaultRbac\Tenancy\CompositeTenantResolver;
 
 return [
 
@@ -55,23 +61,91 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Concrete binding classes
+    | Eloquent model classes
+    |--------------------------------------------------------------------------
+    */
+
+    'models' => [
+        'role' => Role::class,
+        'permission' => Permission::class,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Resolution
     |--------------------------------------------------------------------------
     |
-    | Swap these for your application implementations. Phase 1 ships secure
-    | defaults: deny-all resolution, null tenant, no super-user bypass, no-op
-    | audit and cache invalidation until the engine is wired (Phase 3+).
+    | default_tenant_id: used when AuthorizationContext has no tenant (e.g.
+    | single-tenant apps with NullTenantResolver). Leave null for strict mode.
     |
     */
 
+    'default_tenant_id' => env('VAULTRBAC_DEFAULT_TENANT_ID'),
+
+    'require_tenant_context' => true,
+
+    'require_permission_definition' => true,
+
+    'hierarchy' => [
+        'max_expanded_nodes' => 256,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Tenant / team context (Phase 4)
+    |--------------------------------------------------------------------------
+    |
+    | Sources are evaluated in order; the first non-empty value wins.
+    | Drivers: header, query, route, session, request_attribute, user_attribute.
+    |
+    | Example tenant header:
+    | ['driver' => 'header', 'name' => 'X-Tenant-Id', 'cast' => 'int']
+    |
+    */
+
+    'tenant' => [
+        'sources' => [
+            // ['driver' => 'header', 'name' => 'X-Tenant-Id', 'cast' => 'int'],
+        ],
+    ],
+
+    'team' => [
+        'sources' => [
+            // ['driver' => 'header', 'name' => 'X-Team-Id', 'cast' => 'int'],
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | HTTP middleware status codes
+    |--------------------------------------------------------------------------
+    */
+
+    'middleware' => [
+        'missing_tenant_status' => 403,
+        'unauthorized_status' => 403,
+        'forbidden_tenant_status' => 403,
+        'missing_permission_status' => 403,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Concrete binding classes
+    |--------------------------------------------------------------------------
+    */
+
     'bindings' => [
-        'tenant_resolver' => NullTenantResolver::class,
+        'tenant_resolver' => CompositeTenantResolver::class,
+        'team_resolver' => CompositeTeamResolver::class,
         'authorization_context_factory' => DefaultAuthorizationContextFactory::class,
-        'permission_resolver' => DenyAllPermissionResolver::class,
-        'role_hierarchy_provider' => NullRoleHierarchyProvider::class,
+        'authorization_repository' => EloquentAuthorizationRepository::class,
+        'permission_resolver' => DatabasePermissionResolver::class,
+        'role_hierarchy_provider' => EloquentRoleHierarchyProvider::class,
         'audit_sink' => NullAuditSink::class,
         'cache_invalidator' => NullCacheInvalidator::class,
         'super_user_guard' => NullSuperUserGuard::class,
+        'assignment_service' => AssignmentService::class,
+        'tenant_membership_verifier' => AssignmentBackedTenantMembershipVerifier::class,
     ],
 
     /*

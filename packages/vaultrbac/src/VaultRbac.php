@@ -5,17 +5,22 @@ declare(strict_types=1);
 namespace Artwallet\VaultRbac;
 
 use Artwallet\VaultRbac\Context\AuthorizationContext;
+use Artwallet\VaultRbac\Contracts\AssignmentServiceInterface;
 use Artwallet\VaultRbac\Contracts\AuthorizationContextFactory;
 use Artwallet\VaultRbac\Contracts\PermissionResolverInterface;
+use Artwallet\VaultRbac\Models\Permission;
+use Artwallet\VaultRbac\Models\Role;
+use Illuminate\Database\Eloquent\Model;
 
 /**
- * Application-facing entry for authorization checks (Facade root).
+ * Application-facing entry for authorization checks and assignments (Facade root).
  */
 final class VaultRbac
 {
     public function __construct(
         private readonly PermissionResolverInterface $resolver,
         private readonly AuthorizationContextFactory $contextFactory,
+        private readonly AssignmentServiceInterface $assignments,
     ) {}
 
     public function check(string|\Stringable $ability, ?object $resource = null): bool
@@ -36,5 +41,58 @@ final class VaultRbac
         ?object $resource = null,
     ): bool {
         return $this->resolver->authorize($context, $ability, $resource);
+    }
+
+    public function assignRole(
+        Model $model,
+        Role|string|int $role,
+        string|int $tenantId,
+        string|int|null $teamId = null,
+        string|int|null $assignedBy = null,
+    ): void {
+        $this->assignments->assignRole($model, $role, $tenantId, $teamId, $assignedBy);
+    }
+
+    public function revokeRole(
+        Model $model,
+        Role|string|int $role,
+        string|int $tenantId,
+        string|int|null $teamId = null,
+    ): void {
+        $this->assignments->revokeRole($model, $role, $tenantId, $teamId);
+    }
+
+    /**
+     * @param  list<Role|string|int>  $roles
+     */
+    public function syncRoles(
+        Model $model,
+        array $roles,
+        string|int $tenantId,
+        string|int|null $teamId = null,
+        string|int|null $assignedBy = null,
+    ): void {
+        $this->assignments->syncRoles($model, $roles, $tenantId, $teamId, $assignedBy);
+    }
+
+    public function givePermissionTo(
+        Model $model,
+        Permission|string|int $permission,
+        string|int $tenantId,
+        string|int|null $teamId = null,
+        string $effect = 'allow',
+        string|int|null $assignedBy = null,
+    ): void {
+        $this->assignments->givePermissionTo($model, $permission, $tenantId, $teamId, $effect, $assignedBy);
+    }
+
+    public function revokePermissionTo(
+        Model $model,
+        Permission|string|int $permission,
+        string|int $tenantId,
+        string|int|null $teamId = null,
+        ?string $effect = null,
+    ): void {
+        $this->assignments->revokePermissionTo($model, $permission, $tenantId, $teamId, $effect);
     }
 }

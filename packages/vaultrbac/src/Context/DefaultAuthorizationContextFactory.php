@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Artwallet\VaultRbac\Context;
 
 use Artwallet\VaultRbac\Contracts\AuthorizationContextFactory;
+use Artwallet\VaultRbac\Contracts\TeamResolver;
 use Artwallet\VaultRbac\Contracts\TenantResolver;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use Illuminate\Contracts\Foundation\Application;
@@ -14,6 +15,7 @@ final class DefaultAuthorizationContextFactory implements AuthorizationContextFa
     public function __construct(
         private readonly Application $app,
         private readonly TenantResolver $tenantResolver,
+        private readonly TeamResolver $teamResolver,
         private readonly ConfigRepository $config,
     ) {}
 
@@ -41,7 +43,7 @@ final class DefaultAuthorizationContextFactory implements AuthorizationContextFa
         return new AuthorizationContext(
             user: $user,
             tenantId: $this->tenantResolver->resolve(),
-            teamId: null,
+            teamId: $this->teamResolver->resolve(),
             sessionId: $sessionId,
             deviceId: $deviceId !== '' ? $deviceId : null,
             environment: $environment,
