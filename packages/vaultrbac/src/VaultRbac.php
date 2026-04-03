@@ -48,6 +48,64 @@ final class VaultRbac
     }
 
     /**
+     * @param  list<string|\Stringable>  $abilities
+     */
+    public function checkAny(array $abilities, ?object $resource = null): bool
+    {
+        $context = $this->contextFactory->make();
+        foreach ($abilities as $ability) {
+            if ($this->resolver->authorize($context, $ability, $resource)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param  list<string|\Stringable>  $abilities
+     */
+    public function checkAll(array $abilities, ?object $resource = null): bool
+    {
+        $context = $this->contextFactory->make();
+        foreach ($abilities as $ability) {
+            if (! $this->resolver->authorize($context, $ability, $resource)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * @param  list<string|\Stringable>  $abilities
+     */
+    public function checkAnyFor(AuthorizationContext $context, array $abilities, ?object $resource = null): bool
+    {
+        foreach ($abilities as $ability) {
+            if ($this->resolver->authorize($context, $ability, $resource)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param  list<string|\Stringable>  $abilities
+     */
+    public function checkAllFor(AuthorizationContext $context, array $abilities, ?object $resource = null): bool
+    {
+        foreach ($abilities as $ability) {
+            if (! $this->resolver->authorize($context, $ability, $resource)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * Direct role assignment by name (does not expand hierarchy).
      */
     public function hasRole(

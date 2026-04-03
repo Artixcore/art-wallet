@@ -42,9 +42,11 @@ use Artwallet\VaultRbac\Http\Middleware\EnsureVaultAnyRole;
 use Artwallet\VaultRbac\Http\Middleware\EnsureVaultRole;
 use Artwallet\VaultRbac\Http\Middleware\RequireTenantContext;
 use Artwallet\VaultRbac\Listeners\RecordVaultRbacAudit;
+use Artwallet\VaultRbac\Resolvers\SafePermissionResolver;
 use Artwallet\VaultRbac\Tenancy\RequestSourceReader;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
+use Illuminate\Contracts\Logging\Factory as LogFactory;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Routing\Router;
@@ -118,7 +120,7 @@ final class VaultRbacServiceProvider extends ServiceProvider
         $this->bindConcrete($app, TeamResolver::class, $bindings['team_resolver'] ?? null);
         $this->bindConcrete($app, AuthorizationContextFactory::class, $bindings['authorization_context_factory'] ?? null);
         $this->bindConcrete($app, AuthorizationRepository::class, $bindings['authorization_repository'] ?? null);
-        $this->bindConcrete($app, PermissionResolverInterface::class, $bindings['permission_resolver'] ?? null);
+        $this->registerPermissionResolverBinding($app, $bindings['permission_resolver'] ?? null);
         $this->bindConcrete($app, RoleHierarchyProvider::class, $bindings['role_hierarchy_provider'] ?? null);
         $this->registerAuditSinkBinding($app, (string) ($bindings['audit_sink'] ?? DatabaseAuditSink::class));
         $this->bindConcrete($app, CacheInvalidator::class, $bindings['cache_invalidator'] ?? null);
@@ -195,6 +197,38 @@ final class VaultRbacServiceProvider extends ServiceProvider
     /**
      * @param  class-string|null  $implementation
      */
+    /**
+     * @param  class-string|null  $implementation
+     */
+    private function registerPermissionResolverBinding(Application $app, ?string $implementation): void
+    {
+        if ($implementation === null || $implementation === '') {
+            throw new ConfigurationException(
+                'vaultrbac.bindings mapping for [Artwallet\\VaultRbac\\Contracts\\PermissionResolverInterface] is missing or empty.',
+            );
+        }
+
+        $app->singleton(PermissionResolverInterface::class, static function (Application $app) use ($implementation): PermissionResolverInterface {
+            $inner = $app->make($implementation);
+            if (! $inner instanceof PermissionResolverInterface) {
+                throw new ConfigurationException(
+                    sprintf('vaultrbac.bindings.permission_resolver must implement PermissionResolverInterface, [%s] given.', $implementation),
+                );
+            }
+
+            $config = $app->make(ConfigRepository::class);
+            if ($config->get('vaultrbac.integration.safe_resolver', true)) {
+                return new SafePermissionResolver(
+                    $inner,
+                    $config,
+                    $app->make(LogFactory::class),
+                );
+            }
+
+            return $inner;
+        });
+    }
+
     private function registerAuditSinkBinding(Application $app, string $implementation): void
     {
         $app->singleton(AuditSink::class, static function (Application $app) use ($implementation): AuditSink {
