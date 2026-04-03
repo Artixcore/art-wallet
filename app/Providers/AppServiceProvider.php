@@ -2,13 +2,18 @@
 
 namespace App\Providers;
 
+use App\Listeners\RegisterUserSessionOnLogin;
+use App\Listeners\RevokeUserSessionOnLogout;
 use App\Rbac\ComparingPermissionResolver;
 use Artixcore\ArtGate\Contracts\AuthorizationRepository;
 use Artixcore\ArtGate\Contracts\PermissionResolverInterface;
 use Artixcore\ArtGate\Contracts\RoleHierarchyProvider;
 use Artixcore\ArtGate\Contracts\SuperUserGuard;
 use Artixcore\ArtGate\Resolvers\DatabasePermissionResolver;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Events\Logout;
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Psr\Log\LoggerInterface;
@@ -31,6 +36,9 @@ class AppServiceProvider extends ServiceProvider
         if (! config('vite.use_hot_file')) {
             Vite::useHotFile(storage_path('framework/.vite-no-hot'));
         }
+
+        Event::listen(Login::class, RegisterUserSessionOnLogin::class);
+        Event::listen(Logout::class, RevokeUserSessionOnLogout::class);
 
         $this->registerRbacCompareMode();
     }

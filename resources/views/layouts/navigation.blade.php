@@ -19,6 +19,9 @@
                     <x-nav-link :href="route('crypto.poc')" :active="request()->routeIs('crypto.poc')">
                         {{ __('Crypto PoC') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('security.index')" :active="request()->routeIs('security.index')">
+                        {{ __('Security') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -81,6 +84,9 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('crypto.poc')" :active="request()->routeIs('crypto.poc')">
                 {{ __('Crypto PoC') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('security.index')" :active="request()->routeIs('security.index')">
+                {{ __('Security') }}
             </x-responsive-nav-link>
         </div>
 

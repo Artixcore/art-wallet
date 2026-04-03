@@ -12,6 +12,7 @@ class UserSessionRecord extends Model
     protected $fillable = [
         'user_id',
         'session_id_hash',
+        'session_id_encrypted',
         'login_trusted_device_id',
         'ip_hash',
         'user_agent_hash',

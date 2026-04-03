@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('login_trusted_devices', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->string('public_key', 128)->unique();
+            $table->string('public_key', 128);
             $table->string('key_alg', 32)->default('ed25519');
             $table->unsignedInteger('trust_version')->default(1);
             $table->text('device_label_ciphertext')->nullable();
@@ -22,6 +22,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->index(['user_id', 'revoked_at']);
+            $table->index('public_key');
         });
     }
 

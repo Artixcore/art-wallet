@@ -60,18 +60,21 @@
                         </span>
                     </a>
 
-                    <div class="flex flex-col rounded-xl border border-dashed border-gray-300 dark:border-gray-600 bg-gray-50/80 dark:bg-gray-900/40 p-6">
-                        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-200/80 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
+                    <a href="{{ route('security.index') }}"
+                        class="group flex flex-col rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 shadow-sm hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-md transition duration-200">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/60">
                             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                             </svg>
                         </div>
-                        <h4 class="mt-4 font-semibold text-gray-700 dark:text-gray-300">{{ __('Wallet') }}</h4>
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            {{ __('Create wallet, addresses, and vault sync — coming in Phase 3.') }}
+                        <h4 class="mt-4 font-semibold text-gray-900 dark:text-gray-100">{{ __('Security center') }}</h4>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400 flex-1">
+                            {{ __('Backup, recovery kit, trusted devices, and sessions.') }}
                         </p>
-                        <span class="mt-4 text-xs font-medium uppercase tracking-wide text-gray-400">{{ __('Soon') }}</span>
-                    </div>
+                        <span class="mt-4 text-sm font-medium text-indigo-600 dark:text-indigo-400 group-hover:text-indigo-500">
+                            {{ __('Open') }} →
+                        </span>
+                    </a>
 
                     <div class="flex flex-col rounded-xl border border-dashed border-gray-300 dark:border-gray-600 bg-gray-50/80 dark:bg-gray-900/40 p-6">
                         <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-200/80 dark:bg-gray-700 text-gray-500 dark:text-gray-400">

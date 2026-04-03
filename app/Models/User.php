@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -30,6 +31,30 @@ class User extends Authenticatable
     public function wallets(): HasMany
     {
         return $this->hasMany(Wallet::class);
+    }
+
+    /**
+     * @return HasMany<LoginTrustedDevice, $this>
+     */
+    public function loginTrustedDevices(): HasMany
+    {
+        return $this->hasMany(LoginTrustedDevice::class);
+    }
+
+    /**
+     * @return HasOne<BackupState, $this>
+     */
+    public function backupState(): HasOne
+    {
+        return $this->hasOne(BackupState::class);
+    }
+
+    /**
+     * @return HasOne<RecoveryKit, $this>
+     */
+    public function recoveryKit(): HasOne
+    {
+        return $this->hasOne(RecoveryKit::class);
     }
 
     /**

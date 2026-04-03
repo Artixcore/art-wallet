@@ -7,6 +7,7 @@ use App\Models\LoginTrustedDevice;
 use App\Models\SecurityEvent;
 use App\Models\User;
 use App\Models\UserSessionRecord;
+use Illuminate\Session\Store;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -138,22 +139,84 @@ class DeviceTrustService
         return ['ok' => true, 'challenge' => $result];
     }
 
-    public function elevateSessionForBinding(\Illuminate\Session\Store $session, DeviceChallenge $challenge): void
+    public function elevateSessionForBinding(Store $session, DeviceChallenge $challenge): void
     {
         $session->put('artwallet.session_elevated_at', now()->timestamp);
         $session->put('artwallet.elevation_challenge_uuid', $challenge->public_uuid);
     }
 
-    public function isSessionElevated(\Illuminate\Session\Store $session): bool
+    public function isSessionElevated(Store $session): bool
     {
         $ts = $session->get('artwallet.session_elevated_at');
 
         return is_int($ts) && $ts > 0;
     }
 
-    public function clearElevation(\Illuminate\Session\Store $session): void
+    public function clearElevation(Store $session): void
     {
         $session->forget(['artwallet.session_elevated_at', 'artwallet.elevation_challenge_uuid']);
+    }
+
+    /**
+     * Elevate the current session when a consumed challenge exists for this session binding.
+     */
+    public function tryElevateCurrentSession(User $user, Store $session): bool
+    {
+        $binding = $this->fingerprints->sessionBindingHash($session->getId(), (int) $user->id);
+        $challenge = DeviceChallenge::query()
+            ->where('user_id', $user->id)
+            ->where('session_binding_hash', $binding)
+            ->whereNotNull('consumed_at')
+            ->where('expires_at', '>=', now())
+            ->orderByDesc('consumed_at')
+            ->first();
+
+        if ($challenge === null) {
+            return false;
+        }
+
+        $this->elevateSessionForBinding($session, $challenge);
+
+        return true;
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    public function challengeStatusForCurrentSession(User $user, string $sessionId): ?array
+    {
+        $binding = $this->fingerprints->sessionBindingHash($sessionId, (int) $user->id);
+        $challenge = DeviceChallenge::query()
+            ->where('user_id', $user->id)
+            ->where('session_binding_hash', $binding)
+            ->orderByDesc('created_at')
+            ->first();
+
+        if ($challenge === null) {
+            return null;
+        }
+
+        if ($challenge->isConsumed()) {
+            return [
+                'status' => 'approved',
+                'public_uuid' => $challenge->public_uuid,
+                'client_code' => $challenge->client_code,
+            ];
+        }
+
+        if ($challenge->isExpired()) {
+            return [
+                'status' => 'expired',
+                'public_uuid' => $challenge->public_uuid,
+            ];
+        }
+
+        return [
+            'status' => 'pending',
+            'public_uuid' => $challenge->public_uuid,
+            'client_code' => $challenge->client_code,
+            'expires_at' => $challenge->expires_at->toIso8601String(),
+        ];
     }
 
     public function verifyPublicKeyFormat(string $publicKeyBase64): bool

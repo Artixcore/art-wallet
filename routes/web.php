@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Web\CryptoPocController;
+use App\Http\Controllers\Web\SecurityWebController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -15,6 +16,10 @@ Route::get('/dashboard', function () {
 Route::get('/crypto/poc', [CryptoPocController::class, 'show'])
     ->middleware(['auth', 'verified'])
     ->name('crypto.poc');
+
+Route::get('/security', [SecurityWebController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('security.index');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

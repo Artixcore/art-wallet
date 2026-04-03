@@ -8,6 +8,7 @@ export default defineConfig({
                 'resources/css/app.css',
                 'resources/js/app.js',
                 'resources/js/crypto-poc.js',
+                'resources/js/security-center.js',
             ],
             refresh: true,
         }),
