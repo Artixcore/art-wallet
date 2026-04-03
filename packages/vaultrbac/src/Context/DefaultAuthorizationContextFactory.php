@@ -7,6 +7,7 @@ namespace Artwallet\VaultRbac\Context;
 use Artwallet\VaultRbac\Contracts\AuthorizationContextFactory;
 use Artwallet\VaultRbac\Contracts\TeamResolver;
 use Artwallet\VaultRbac\Contracts\TenantResolver;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use Illuminate\Contracts\Foundation\Application;
 
@@ -26,10 +27,20 @@ final class DefaultAuthorizationContextFactory implements AuthorizationContextFa
             $user = $this->app->make('auth')->user();
         }
 
+        return $this->build($user);
+    }
+
+    public function makeFor(?Authenticatable $user): AuthorizationContext
+    {
+        return $this->build($user);
+    }
+
+    private function build(?Authenticatable $user): AuthorizationContext
+    {
         $sessionId = null;
         $deviceId = null;
 
-        if (! $this->app->runningInConsole() && $this->app->bound('request')) {
+        if ($this->app->bound('request')) {
             $request = $this->app->make('request');
             if ($request->hasSession()) {
                 $sessionId = $request->session()->getId();
@@ -45,7 +56,7 @@ final class DefaultAuthorizationContextFactory implements AuthorizationContextFa
             tenantId: $this->tenantResolver->resolve(),
             teamId: $this->teamResolver->resolve(),
             sessionId: $sessionId,
-            deviceId: $deviceId !== '' ? $deviceId : null,
+            deviceId: $deviceId !== '' && $deviceId !== null ? (string) $deviceId : null,
             environment: $environment,
         );
     }

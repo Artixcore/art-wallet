@@ -107,6 +107,39 @@ final class EloquentAuthorizationRepository implements AuthorizationRepository
             ->all();
     }
 
+    public function userHasActiveRoleNamed(
+        Model $user,
+        string $roleName,
+        string|int $tenantId,
+        string|int|null $teamId,
+    ): bool {
+        return ModelRole::query()
+            ->where('tenant_id', $tenantId)
+            ->where('model_type', $user->getMorphClass())
+            ->where('model_id', $user->getKey())
+            ->whereNull('suspended_at')
+            ->where(function ($query): void {
+                $query->whereNull('expires_at')->orWhere('expires_at', '>', now());
+            })
+            ->where(function ($query) use ($teamId): void {
+                if ($teamId === null) {
+                    $query->whereNull('team_id');
+                } else {
+                    $query->where(function ($inner) use ($teamId): void {
+                        $inner->whereNull('team_id')->orWhere('team_id', $teamId);
+                    });
+                }
+            })
+            ->whereHas('role', function ($query) use ($roleName, $tenantId): void {
+                $query->where('name', $roleName)
+                    ->where('activation_state', 'active')
+                    ->where(function ($inner) use ($tenantId): void {
+                        $inner->whereNull('tenant_id')->orWhere('tenant_id', $tenantId);
+                    });
+            })
+            ->exists();
+    }
+
     /**
      * @return class-string<Permission>
      */

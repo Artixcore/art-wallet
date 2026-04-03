@@ -51,4 +51,15 @@ interface AuthorizationRepository
      * @return list<int|string>
      */
     public function permissionIdsGrantedToRoles(array $roleIds, string|int $tenantId): array;
+
+    /**
+     * Whether the user has an active assignment to a role with the given name
+     * (direct assignment only; hierarchy not expanded).
+     */
+    public function userHasActiveRoleNamed(
+        Model $user,
+        string $roleName,
+        string|int $tenantId,
+        string|int|null $teamId,
+    ): bool;
 }

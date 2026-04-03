@@ -7,9 +7,11 @@ namespace Artwallet\VaultRbac;
 use Artwallet\VaultRbac\Context\AuthorizationContext;
 use Artwallet\VaultRbac\Contracts\AssignmentServiceInterface;
 use Artwallet\VaultRbac\Contracts\AuthorizationContextFactory;
+use Artwallet\VaultRbac\Contracts\AuthorizationRepository;
 use Artwallet\VaultRbac\Contracts\PermissionResolverInterface;
 use Artwallet\VaultRbac\Models\Permission;
 use Artwallet\VaultRbac\Models\Role;
+use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -21,6 +23,8 @@ final class VaultRbac
         private readonly PermissionResolverInterface $resolver,
         private readonly AuthorizationContextFactory $contextFactory,
         private readonly AssignmentServiceInterface $assignments,
+        private readonly AuthorizationRepository $authorizationRepository,
+        private readonly ConfigRepository $config,
     ) {}
 
     public function check(string|\Stringable $ability, ?object $resource = null): bool
@@ -41,6 +45,38 @@ final class VaultRbac
         ?object $resource = null,
     ): bool {
         return $this->resolver->authorize($context, $ability, $resource);
+    }
+
+    /**
+     * Direct role assignment by name (does not expand hierarchy).
+     */
+    public function hasRole(
+        string|\Stringable $roleName,
+        string|int|null $tenantId = null,
+        string|int|null $teamId = null,
+    ): bool {
+        $context = $this->contextFactory->make();
+        $user = $context->user;
+        if (! $user instanceof Model) {
+            return false;
+        }
+
+        $resolvedTenant = $tenantId ?? $context->tenantId ?? $this->config->get('vaultrbac.default_tenant_id');
+        if ($resolvedTenant === null && $this->config->get('vaultrbac.require_tenant_context', true)) {
+            return false;
+        }
+        if ($resolvedTenant === null) {
+            return false;
+        }
+
+        $resolvedTeam = $teamId ?? $context->teamId;
+
+        return $this->authorizationRepository->userHasActiveRoleNamed(
+            $user,
+            trim((string) $roleName),
+            $resolvedTenant,
+            $resolvedTeam,
+        );
     }
 
     public function assignRole(

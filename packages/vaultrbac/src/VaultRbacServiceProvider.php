@@ -18,6 +18,8 @@ use Artwallet\VaultRbac\Contracts\SuperUserGuard;
 use Artwallet\VaultRbac\Contracts\TeamResolver;
 use Artwallet\VaultRbac\Contracts\TenantMembershipVerifier;
 use Artwallet\VaultRbac\Contracts\TenantResolver;
+use Artwallet\VaultRbac\Console\DoctorCommand;
+use Artwallet\VaultRbac\Console\SyncPermissionsCommand;
 use Artwallet\VaultRbac\Events\PermissionGranted;
 use Artwallet\VaultRbac\Events\PermissionRevoked;
 use Artwallet\VaultRbac\Events\RoleAssigned;
@@ -25,12 +27,19 @@ use Artwallet\VaultRbac\Events\RoleRevoked;
 use Artwallet\VaultRbac\Exceptions\ConfigurationException;
 use Artwallet\VaultRbac\Http\Middleware\AuthorizeVaultPermission;
 use Artwallet\VaultRbac\Http\Middleware\EnsureTenantMembership;
+use Artwallet\VaultRbac\Http\Middleware\EnsureVaultAnyRole;
+use Artwallet\VaultRbac\Http\Middleware\EnsureVaultRole;
 use Artwallet\VaultRbac\Http\Middleware\RequireTenantContext;
 use Artwallet\VaultRbac\Listeners\RecordVaultRbacAudit;
 use Artwallet\VaultRbac\Tenancy\RequestSourceReader;
+use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Routing\Router;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 final class VaultRbacServiceProvider extends ServiceProvider
@@ -40,6 +49,11 @@ final class VaultRbacServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__.'/../config/vaultrbac.php', 'vaultrbac');
 
         $this->registerBindings();
+
+        $this->commands([
+            DoctorCommand::class,
+            SyncPermissionsCommand::class,
+        ]);
     }
 
     public function boot(): void
@@ -52,6 +66,11 @@ final class VaultRbacServiceProvider extends ServiceProvider
         $router->aliasMiddleware('vault.tenant', RequireTenantContext::class);
         $router->aliasMiddleware('vault.tenant.member', EnsureTenantMembership::class);
         $router->aliasMiddleware('vault.permission', AuthorizeVaultPermission::class);
+        $router->aliasMiddleware('vault.role', EnsureVaultRole::class);
+        $router->aliasMiddleware('vault.any-role', EnsureVaultAnyRole::class);
+
+        $this->registerVaultGate();
+        $this->registerVaultBladeDirectives();
 
         $listener = RecordVaultRbacAudit::class;
         Event::listen(RoleAssigned::class, [$listener, 'handleRoleAssigned']);
@@ -100,7 +119,53 @@ final class VaultRbacServiceProvider extends ServiceProvider
                 $app->make(PermissionResolverInterface::class),
                 $app->make(AuthorizationContextFactory::class),
                 $app->make(AssignmentServiceInterface::class),
+                $app->make(AuthorizationRepository::class),
+                $app->make(ConfigRepository::class),
             );
+        });
+    }
+
+    private function registerVaultGate(): void
+    {
+        $config = $this->app->make('config');
+
+        if (! $config->get('vaultrbac.gate.enabled', true)) {
+            return;
+        }
+
+        $ability = (string) $config->get('vaultrbac.gate.ability', 'vaultrbac');
+
+        Gate::define($ability, function (?Authenticatable $user, string $permission, mixed $resource = null): bool {
+            if (! $user instanceof Model) {
+                return false;
+            }
+
+            $context = app(AuthorizationContextFactory::class)->makeFor($user);
+
+            return app(PermissionResolverInterface::class)->authorize(
+                $context,
+                $permission,
+                is_object($resource) ? $resource : null,
+            );
+        });
+    }
+
+    private function registerVaultBladeDirectives(): void
+    {
+        $config = $this->app->make('config');
+
+        if (! $config->get('vaultrbac.blade.enabled', true)) {
+            return;
+        }
+
+        Blade::if('vaultcan', function (string|\Stringable $ability, mixed $resource = null): bool {
+            $object = is_object($resource) ? $resource : null;
+
+            return app(VaultRbac::class)->check($ability, $object);
+        });
+
+        Blade::if('vaultrole', function (string|\Stringable $role): bool {
+            return app(VaultRbac::class)->hasRole($role);
         });
     }
 
