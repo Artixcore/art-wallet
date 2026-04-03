@@ -14,7 +14,7 @@ class AuditEvent extends Model
 
     protected static function vaultTableKey(): string
     {
-        return 'audit_events';
+        return 'audit_logs';
     }
 
     public $timestamps = false;
@@ -30,6 +30,7 @@ class AuditEvent extends Model
         'target_type',
         'target_id',
         'diff',
+        'diff_json_id',
         'ip_address',
         'user_agent',
         'session_id',

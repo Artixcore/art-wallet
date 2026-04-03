@@ -28,10 +28,15 @@ final class VaultRbacMigrationsTest extends TestCase
             'role_hierarchy',
             'permission_scopes',
             'permission_inheritance',
-            'encrypted_payloads',
+            'tenant_roles',
+            'tenant_permissions',
+            'temporary_permissions',
+            'role_expirations',
+            'permission_cache_versions',
+            'encrypted_metadata',
             'super_user_actions',
             'cache_versions',
-            'audit_events',
+            'audit_logs',
         ];
 
         foreach ($keys as $key) {

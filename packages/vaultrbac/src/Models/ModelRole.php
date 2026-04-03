@@ -22,6 +22,7 @@ class ModelRole extends Model
     protected $fillable = [
         'tenant_id',
         'team_id',
+        'team_key',
         'role_id',
         'model_type',
         'model_id',
@@ -41,6 +42,13 @@ class ModelRole extends Model
             'suspended_at' => 'datetime',
             'metadata' => MaybeEncryptedJson::class,
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::saving(function (self $model): void {
+            $model->team_key = $model->team_id !== null ? (int) $model->team_id : 0;
+        });
     }
 
     public function tenant(): BelongsTo

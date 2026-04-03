@@ -11,7 +11,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        $name = VaultrbacTables::name('audit_events');
+        $name = VaultrbacTables::name('audit_logs');
 
         Schema::create($name, function (Blueprint $table) {
             $table->id();
@@ -39,6 +39,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists(VaultrbacTables::name('audit_events'));
+        Schema::dropIfExists(VaultrbacTables::name('audit_logs'));
     }
 };

@@ -40,12 +40,13 @@ final class AssignmentService implements AssignmentServiceInterface
             $assignment = ModelRole::query()->firstOrCreate(
                 [
                     'tenant_id' => $tenantId,
-                    'team_id' => $teamId,
+                    'team_key' => $teamId !== null ? (int) $teamId : 0,
                     'role_id' => $roleModel->getKey(),
                     'model_type' => $model->getMorphClass(),
                     'model_id' => $model->getKey(),
                 ],
                 [
+                    'team_id' => $teamId,
                     'assigned_by' => $assignedBy,
                     'assigned_at' => now(),
                 ],
@@ -74,13 +75,8 @@ final class AssignmentService implements AssignmentServiceInterface
                 ->where('tenant_id', $tenantId)
                 ->where('role_id', $roleModel->getKey())
                 ->where('model_type', $model->getMorphClass())
-                ->where('model_id', $model->getKey());
-
-            if ($teamId === null) {
-                $query->whereNull('team_id');
-            } else {
-                $query->where('team_id', $teamId);
-            }
+                ->where('model_id', $model->getKey())
+                ->where('team_key', $teamId !== null ? (int) $teamId : 0);
 
             $deleted = $query->delete();
 
@@ -113,13 +109,8 @@ final class AssignmentService implements AssignmentServiceInterface
             $query = ModelRole::query()
                 ->where('tenant_id', $tenantId)
                 ->where('model_type', $model->getMorphClass())
-                ->where('model_id', $model->getKey());
-
-            if ($teamId === null) {
-                $query->whereNull('team_id');
-            } else {
-                $query->where('team_id', $teamId);
-            }
+                ->where('model_id', $model->getKey())
+                ->where('team_key', $teamId !== null ? (int) $teamId : 0);
 
             $existing = $query->get();
             $existingIds = $existing->pluck('role_id')->map(static fn ($id): string => (string) $id)->all();
@@ -145,6 +136,7 @@ final class AssignmentService implements AssignmentServiceInterface
                 $assignment = ModelRole::query()->create([
                     'tenant_id' => $tenantId,
                     'team_id' => $teamId,
+                    'team_key' => $teamId !== null ? (int) $teamId : 0,
                     'role_id' => $roleModel->getKey(),
                     'model_type' => $model->getMorphClass(),
                     'model_id' => $model->getKey(),
@@ -178,13 +170,14 @@ final class AssignmentService implements AssignmentServiceInterface
             $assignment = ModelPermission::query()->firstOrCreate(
                 [
                     'tenant_id' => $tenantId,
-                    'team_id' => $teamId,
+                    'team_key' => $teamId !== null ? (int) $teamId : 0,
                     'permission_id' => $permissionModel->getKey(),
                     'model_type' => $model->getMorphClass(),
                     'model_id' => $model->getKey(),
                     'effect' => $effect,
                 ],
                 [
+                    'team_id' => $teamId,
                     'assigned_by' => $assignedBy,
                     'assigned_at' => now(),
                 ],
@@ -214,13 +207,8 @@ final class AssignmentService implements AssignmentServiceInterface
                 ->where('tenant_id', $tenantId)
                 ->where('permission_id', $permissionModel->getKey())
                 ->where('model_type', $model->getMorphClass())
-                ->where('model_id', $model->getKey());
-
-            if ($teamId === null) {
-                $query->whereNull('team_id');
-            } else {
-                $query->where('team_id', $teamId);
-            }
+                ->where('model_id', $model->getKey())
+                ->where('team_key', $teamId !== null ? (int) $teamId : 0);
 
             if ($effect !== null) {
                 $query->where('effect', $effect);
@@ -242,30 +230,24 @@ final class AssignmentService implements AssignmentServiceInterface
         bool $roles,
     ): void {
         if ($roles) {
-            $q = ModelRole::query()
+            ModelRole::query()
                 ->where('tenant_id', $tenantId)
                 ->where('model_type', $model->getMorphClass())
-                ->where('model_id', $model->getKey());
-            if ($teamId === null) {
-                $q->whereNull('team_id');
-            } else {
-                $q->where('team_id', $teamId);
-            }
-            $q->lockForUpdate()->get();
+                ->where('model_id', $model->getKey())
+                ->where('team_key', $teamId !== null ? (int) $teamId : 0)
+                ->lockForUpdate()
+                ->get();
 
             return;
         }
 
-        $q = ModelPermission::query()
+        ModelPermission::query()
             ->where('tenant_id', $tenantId)
             ->where('model_type', $model->getMorphClass())
-            ->where('model_id', $model->getKey());
-        if ($teamId === null) {
-            $q->whereNull('team_id');
-        } else {
-            $q->where('team_id', $teamId);
-        }
-        $q->lockForUpdate()->get();
+            ->where('model_id', $model->getKey())
+            ->where('team_key', $teamId !== null ? (int) $teamId : 0)
+            ->lockForUpdate()
+            ->get();
     }
 
     private function bumpCache(string|int $tenantId, Model $model): void

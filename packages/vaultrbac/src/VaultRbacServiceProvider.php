@@ -6,6 +6,8 @@ namespace Artwallet\VaultRbac;
 
 use Artwallet\VaultRbac\Audit\DatabaseAuditSink;
 use Artwallet\VaultRbac\Audit\NullAuditSink;
+use Artwallet\VaultRbac\Console\DoctorCommand;
+use Artwallet\VaultRbac\Console\SyncPermissionsCommand;
 use Artwallet\VaultRbac\Contracts\ApprovalWorkflowInterface;
 use Artwallet\VaultRbac\Contracts\AssignmentServiceInterface;
 use Artwallet\VaultRbac\Contracts\AuditSink;
@@ -18,8 +20,7 @@ use Artwallet\VaultRbac\Contracts\SuperUserGuard;
 use Artwallet\VaultRbac\Contracts\TeamResolver;
 use Artwallet\VaultRbac\Contracts\TenantMembershipVerifier;
 use Artwallet\VaultRbac\Contracts\TenantResolver;
-use Artwallet\VaultRbac\Console\DoctorCommand;
-use Artwallet\VaultRbac\Console\SyncPermissionsCommand;
+use Artwallet\VaultRbac\Database\BlueprintMacros;
 use Artwallet\VaultRbac\Events\PermissionGranted;
 use Artwallet\VaultRbac\Events\PermissionRevoked;
 use Artwallet\VaultRbac\Events\RoleAssigned;
@@ -58,6 +59,8 @@ final class VaultRbacServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        BlueprintMacros::register();
+
         if ($this->app->make('config')->get('vaultrbac.run_package_migrations', true)) {
             $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
         }

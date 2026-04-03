@@ -11,19 +11,23 @@ return new class extends Migration
 {
     public function up(): void
     {
-        $name = VaultrbacTables::name('encrypted_payloads');
+        $name = VaultrbacTables::name('encrypted_metadata');
 
         Schema::create($name, function (Blueprint $table) {
             $table->id();
-            $table->text('ciphertext');
-            $table->text('dek_wrapped')->nullable();
+            $table->longText('ciphertext');
+            $table->text('wrapped_dek')->nullable();
             $table->string('key_version', 64)->nullable();
-            $table->timestamps();
+            $table->binary('nonce', 32)->nullable();
+            $table->binary('tag', 16)->nullable();
+            $table->string('algo', 32)->nullable();
+            $table->binary('plaintext_fingerprint', 32)->nullable();
+            $table->timestamp('created_at')->useCurrent();
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists(VaultrbacTables::name('encrypted_payloads'));
+        Schema::dropIfExists(VaultrbacTables::name('encrypted_metadata'));
     }
 };

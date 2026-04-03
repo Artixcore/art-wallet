@@ -42,10 +42,38 @@ return [
         'role_hierarchy' => 'vrb_role_hierarchy',
         'permission_scopes' => 'vrb_permission_scopes',
         'permission_inheritance' => 'vrb_permission_inheritance',
-        'encrypted_payloads' => 'vrb_encrypted_payloads',
+        'tenant_roles' => 'vrb_tenant_roles',
+        'tenant_permissions' => 'vrb_tenant_permissions',
+        'temporary_permissions' => 'vrb_temporary_permissions',
+        'role_expirations' => 'vrb_role_expirations',
+        'permission_cache_versions' => 'vrb_permission_cache_versions',
+        'encrypted_metadata' => 'vrb_encrypted_metadata',
+        /*
+         * Deprecated keys: same physical table as encrypted_metadata (upgrade path).
+         */
+        'encrypted_payloads' => 'vrb_encrypted_metadata',
         'super_user_actions' => 'vrb_super_user_actions',
         'cache_versions' => 'vrb_cache_versions',
-        'audit_events' => 'vrb_audit_events',
+        'audit_logs' => 'vrb_audit_logs',
+        /*
+         * Deprecated keys: same physical table as audit_logs (upgrade path).
+         */
+        'audit_events' => 'vrb_audit_logs',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Primary key strategy for RBAC tables (new publishes / stubs)
+    |--------------------------------------------------------------------------
+    |
+    | bigint: auto-increment ids (default). uuid: char(36) primary keys — requires
+    | publishing stub migrations and aligning morph ids; not applied to historical
+    | package migrations automatically.
+    |
+    */
+
+    'ids' => [
+        'type' => env('VAULTRBAC_IDS_TYPE', 'bigint'),
     ],
 
     /*
@@ -55,6 +83,9 @@ return [
     |
     | Set to false if you published migrations to database/migrations and want
     | to run only the copied files (avoids running the same schema twice).
+    |
+    | Publish tags (console): vaultrbac-config, vaultrbac-migrations,
+    | vaultrbac-stubs (includes migration.rbac.stub)
     |
     */
 

@@ -42,11 +42,9 @@ final class EloquentAuthorizationRepository implements AuthorizationRepository
             ->where('tenant_id', $tenantId)
             ->where(function ($query) use ($teamId): void {
                 if ($teamId === null) {
-                    $query->whereNull('team_id');
+                    $query->where('team_key', 0);
                 } else {
-                    $query->where(function ($inner) use ($teamId): void {
-                        $inner->whereNull('team_id')->orWhere('team_id', $teamId);
-                    });
+                    $query->whereIn('team_key', [0, (int) $teamId]);
                 }
             })
             ->whereNull('suspended_at')
@@ -68,11 +66,9 @@ final class EloquentAuthorizationRepository implements AuthorizationRepository
             ->where('tenant_id', $tenantId)
             ->where(function ($query) use ($teamId): void {
                 if ($teamId === null) {
-                    $query->whereNull('team_id');
+                    $query->where('team_key', 0);
                 } else {
-                    $query->where(function ($inner) use ($teamId): void {
-                        $inner->whereNull('team_id')->orWhere('team_id', $teamId);
-                    });
+                    $query->whereIn('team_key', [0, (int) $teamId]);
                 }
             })
             ->whereNull('suspended_at')
@@ -123,11 +119,9 @@ final class EloquentAuthorizationRepository implements AuthorizationRepository
             })
             ->where(function ($query) use ($teamId): void {
                 if ($teamId === null) {
-                    $query->whereNull('team_id');
+                    $query->where('team_key', 0);
                 } else {
-                    $query->where(function ($inner) use ($teamId): void {
-                        $inner->whereNull('team_id')->orWhere('team_id', $teamId);
-                    });
+                    $query->whereIn('team_key', [0, (int) $teamId]);
                 }
             })
             ->whereHas('role', function ($query) use ($roleName, $tenantId): void {
