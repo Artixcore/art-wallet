@@ -7,7 +7,7 @@ namespace Artwallet\VaultRbac\Resolvers;
 use Artwallet\VaultRbac\Context\AuthorizationContext;
 use Artwallet\VaultRbac\Contracts\PermissionResolverInterface;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
-use Illuminate\Contracts\Logging\Factory as LogFactory;
+use Illuminate\Log\LogManager;
 use Psr\Log\LoggerInterface;
 use Throwable;
 
@@ -19,7 +19,7 @@ final class SafePermissionResolver implements PermissionResolverInterface
     public function __construct(
         private readonly PermissionResolverInterface $inner,
         private readonly ConfigRepository $config,
-        private readonly LogFactory $logFactory,
+        private readonly LogManager $logManager,
     ) {}
 
     public function authorize(
@@ -43,8 +43,8 @@ final class SafePermissionResolver implements PermissionResolverInterface
 
         /** @var LoggerInterface $logger */
         $logger = is_string($channel) && $channel !== ''
-            ? $this->logFactory->channel($channel)
-            : $this->logFactory->channel();
+            ? $this->logManager->channel($channel)
+            : $this->logManager->channel();
 
         $message = 'VaultRBAC permission resolver denied due to internal error.';
 

@@ -178,6 +178,27 @@ return [
         'unauthorized_status' => 403,
         'forbidden_tenant_status' => 403,
         'missing_permission_status' => 403,
+        'unauthenticated_status' => 401,
+        'invalid_arguments_status' => 403,
+        'integration_error_status' => 403,
+        'treat_guest_as_unauthorized' => true,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Framework integration (middleware, logging, request attributes)
+    |--------------------------------------------------------------------------
+    */
+
+    'integration' => [
+        'tenant_request_attribute' => 'vaultrbac.tenant_id',
+        'safe_resolver' => env('VAULTRBAC_SAFE_RESOLVER', true),
+        'defer_http_features_in_console' => false,
+        'expose_integration_exceptions' => env('VAULTRBAC_EXPOSE_INTEGRATION_EXCEPTIONS', false),
+        'log_channel' => env('VAULTRBAC_LOG_CHANNEL'),
+        'log_level' => env('VAULTRBAC_LOG_LEVEL', 'error'),
+        'verify_tenant_exists_on_resolve' => false,
+        'verify_membership_after_tenant_resolve' => false,
     ],
 
     /*
@@ -193,6 +214,10 @@ return [
     'gate' => [
         'enabled' => env('VAULTRBAC_GATE_ENABLED', true),
         'ability' => env('VAULTRBAC_GATE_ABILITY', 'vaultrbac'),
+        'register_any_ability' => env('VAULTRBAC_GATE_REGISTER_ANY', true),
+        'register_all_ability' => env('VAULTRBAC_GATE_REGISTER_ALL', true),
+        'ability_any' => env('VAULTRBAC_GATE_ABILITY_ANY', 'vaultrbac.any'),
+        'ability_all' => env('VAULTRBAC_GATE_ABILITY_ALL', 'vaultrbac.all'),
     ],
 
     /*
@@ -206,6 +231,43 @@ return [
 
     'blade' => [
         'enabled' => env('VAULTRBAC_BLADE_ENABLED', true),
+        'extended' => env('VAULTRBAC_BLADE_EXTENDED', true),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Global helpers (optional require in service provider)
+    |--------------------------------------------------------------------------
+    */
+
+    'helpers' => [
+        'enabled' => env('VAULTRBAC_HELPERS_ENABLED', false),
+        'strict_context' => env('VAULTRBAC_HELPERS_STRICT_CONTEXT', false),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Permission cache version / client freshness (optional middleware)
+    |--------------------------------------------------------------------------
+    */
+
+    'freshness' => [
+        'enabled' => env('VAULTRBAC_FRESHNESS_ENABLED', false),
+        'header' => env('VAULTRBAC_FRESHNESS_HEADER', 'X-VaultRbac-Permission-Version'),
+        'scope' => env('VAULTRBAC_FRESHNESS_SCOPE', 'tenant'),
+        'mismatch_status' => (int) env('VAULTRBAC_FRESHNESS_MISMATCH_STATUS', 403),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | RequireApprovedPrivilege middleware defaults
+    |--------------------------------------------------------------------------
+    */
+
+    'approval_middleware' => [
+        'correlation_route_parameter' => 'correlation_id',
+        'require_subject_is_authenticated_user' => true,
+        'tenant_must_match_context' => true,
     ],
 
     /*

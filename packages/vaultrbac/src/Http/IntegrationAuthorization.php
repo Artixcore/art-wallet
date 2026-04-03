@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Artwallet\VaultRbac\Http;
 
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
-use Illuminate\Contracts\Logging\Factory as LogFactory;
+use Illuminate\Log\LogManager;
 use Illuminate\Http\Request;
 use Psr\Log\LoggerInterface;
 use Throwable;
@@ -17,7 +17,7 @@ final class IntegrationAuthorization
 {
     public function __construct(
         private readonly ConfigRepository $config,
-        private readonly LogFactory $logFactory,
+        private readonly LogManager $logManager,
     ) {}
 
     public function assertAuthenticatedOrAbort(Request $request): void
@@ -78,8 +78,8 @@ final class IntegrationAuthorization
         $channel = $this->config->get('vaultrbac.integration.log_channel');
         /** @var LoggerInterface $logger */
         $logger = is_string($channel) && $channel !== ''
-            ? $this->logFactory->channel($channel)
-            : $this->logFactory->channel();
+            ? $this->logManager->channel($channel)
+            : $this->logManager->channel();
 
         $message = 'VaultRBAC integration aborted due to internal error.';
 
@@ -107,8 +107,8 @@ final class IntegrationAuthorization
         $channel = $this->config->get('vaultrbac.integration.log_channel');
         /** @var LoggerInterface $logger */
         $logger = is_string($channel) && $channel !== ''
-            ? $this->logFactory->channel($channel)
-            : $this->logFactory->channel();
+            ? $this->logManager->channel($channel)
+            : $this->logManager->channel();
 
         $logger->warning($message);
     }

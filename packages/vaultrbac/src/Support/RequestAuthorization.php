@@ -7,9 +7,8 @@ namespace Artwallet\VaultRbac\Support;
 use Artwallet\VaultRbac\Context\AuthorizationContext;
 use Artwallet\VaultRbac\Contracts\AuthorizationContextFactory;
 use Artwallet\VaultRbac\Contracts\TenantResolver;
-use Artwallet\VaultRbac\Exceptions\TenantResolutionException;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
-use Illuminate\Contracts\Logging\Factory as LogFactory;
+use Illuminate\Log\LogManager;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Psr\Log\LoggerInterface;
@@ -24,7 +23,7 @@ final class RequestAuthorization
         private readonly TenantResolver $tenantResolver,
         private readonly AuthorizationContextFactory $contextFactory,
         private readonly ConfigRepository $config,
-        private readonly LogFactory $logFactory,
+        private readonly LogManager $logManager,
     ) {}
 
     public function currentTenant(): string|int|null
@@ -40,12 +39,12 @@ final class RequestAuthorization
     {
         try {
             return $this->contextFactory->make();
-        } catch (TenantResolutionException $e) {
+        } catch (Throwable $e) {
             if ((bool) $this->config->get('vaultrbac.helpers.strict_context', false)) {
                 throw $e;
             }
 
-            $this->logTenantResolutionFailure($e);
+            $this->logContextFailure($e);
 
             return new AuthorizationContext(
                 user: null,
@@ -134,15 +133,15 @@ final class RequestAuthorization
         return null;
     }
 
-    private function logTenantResolutionFailure(TenantResolutionException $e): void
+    private function logContextFailure(Throwable $e): void
     {
         $channel = $this->config->get('vaultrbac.integration.log_channel');
         /** @var LoggerInterface $logger */
         $logger = is_string($channel) && $channel !== ''
-            ? $this->logFactory->channel($channel)
-            : $this->logFactory->channel();
+            ? $this->logManager->channel($channel)
+            : $this->logManager->channel();
 
-        $logger->warning('VaultRBAC tenant resolution failed; returning empty authorization context.', [
+        $logger->warning('VaultRBAC authorization context could not be built; returning empty context.', [
             'exception' => $e::class,
         ]);
     }
