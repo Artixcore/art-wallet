@@ -12,10 +12,12 @@
             "dist": {
                 "type": "path",
                 "url": "packages/vaultrbac",
-                "reference": "9369e01cd93ed7f9ea5535acbbef648ba8615be1"
+                "reference": "ee437bd81d9689144b1daece24334ae67f70b296"
             },
             "require": {
                 "illuminate/auth": "^11.0|^12.0|^13.0",
+                "illuminate/cache": "^11.0|^12.0|^13.0",
+                "illuminate/console": "^11.0|^12.0|^13.0",
                 "illuminate/contracts": "^11.0|^12.0|^13.0",
                 "illuminate/http": "^11.0|^12.0|^13.0",
                 "illuminate/log": "^11.0|^12.0|^13.0",

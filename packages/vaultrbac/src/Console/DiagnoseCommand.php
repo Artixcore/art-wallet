@@ -206,6 +206,7 @@ final class DiagnoseCommand extends Command
         $visited = [];
         $stack = [];
 
+        $visit = null;
         $visit = function (int $node) use (&$visit, &$visited, &$stack, $adj): bool {
             if (isset($stack[$node])) {
                 return true;

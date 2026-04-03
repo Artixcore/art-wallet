@@ -6,7 +6,18 @@ namespace Artwallet\VaultRbac;
 
 use Artwallet\VaultRbac\Audit\DatabaseAuditSink;
 use Artwallet\VaultRbac\Audit\NullAuditSink;
+use Artwallet\VaultRbac\Console\ApprovalApproveCommand;
+use Artwallet\VaultRbac\Console\ApprovalListCommand;
+use Artwallet\VaultRbac\Console\ApprovalRejectCommand;
+use Artwallet\VaultRbac\Console\AuditPruneCommand;
+use Artwallet\VaultRbac\Console\CacheFlushCommand;
+use Artwallet\VaultRbac\Console\CacheWarmCommand;
+use Artwallet\VaultRbac\Console\DiagnoseCommand;
 use Artwallet\VaultRbac\Console\DoctorCommand;
+use Artwallet\VaultRbac\Console\PermissionAssignCommand;
+use Artwallet\VaultRbac\Console\PermissionCreateCommand;
+use Artwallet\VaultRbac\Console\RoleAssignCommand;
+use Artwallet\VaultRbac\Console\RoleCreateCommand;
 use Artwallet\VaultRbac\Console\SyncPermissionsCommand;
 use Artwallet\VaultRbac\Contracts\ApprovalRequestRepository;
 use Artwallet\VaultRbac\Contracts\ApprovalWorkflowInterface;
@@ -80,8 +91,19 @@ final class VaultRbacServiceProvider extends ServiceProvider
         $this->registerBindings();
 
         $this->commands([
+            DiagnoseCommand::class,
             DoctorCommand::class,
             SyncPermissionsCommand::class,
+            CacheWarmCommand::class,
+            CacheFlushCommand::class,
+            AuditPruneCommand::class,
+            ApprovalListCommand::class,
+            ApprovalApproveCommand::class,
+            ApprovalRejectCommand::class,
+            RoleCreateCommand::class,
+            PermissionCreateCommand::class,
+            RoleAssignCommand::class,
+            PermissionAssignCommand::class,
         ]);
     }
 
@@ -526,13 +548,22 @@ final class VaultRbacServiceProvider extends ServiceProvider
 
     private function loadHelpersIfEnabled(): void
     {
-        if (! $this->app->make('config')->get('vaultrbac.helpers.enabled', false)) {
+        $config = $this->app->make('config');
+
+        if (! $config->get('vaultrbac.helpers.enabled', false)) {
             return;
         }
 
         $path = __DIR__.'/Support/helpers.php';
         if (is_file($path)) {
             require_once $path;
+        }
+
+        if ($config->get('vaultrbac.helpers.rbac_aliases_enabled', false)) {
+            $aliases = __DIR__.'/Support/helpers_rbac_aliases.php';
+            if (is_file($aliases)) {
+                require_once $aliases;
+            }
         }
     }
 
