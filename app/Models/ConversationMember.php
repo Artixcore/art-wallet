@@ -7,11 +7,26 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ConversationMember extends Model
 {
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'last_read_at' => 'datetime',
+            'muted' => 'boolean',
+        ];
+    }
+
     protected $fillable = [
         'conversation_id',
         'user_id',
         'role',
         'wrapped_conv_key_ciphertext',
+        'wrapped_ck_version',
+        'last_read_message_id',
+        'last_read_at',
+        'muted',
     ];
 
     /**
@@ -28,5 +43,13 @@ class ConversationMember extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * @return BelongsTo<Message, $this>
+     */
+    public function lastReadMessage(): BelongsTo
+    {
+        return $this->belongsTo(Message::class, 'last_read_message_id');
     }
 }

@@ -18,6 +18,8 @@ class CryptoEnvelopeValidator
 
     public const WRAP_FORMAT = 'artwallet-wrap-v1';
 
+    public const ATTACHMENT_MANIFEST_VERSION = '1';
+
     /**
      * @param  array<string, mixed>  $data
      * @return array<string, mixed> Validated data
@@ -113,6 +115,36 @@ class CryptoEnvelopeValidator
         $ct = base64_decode($ciphertextB64, true);
         if ($ct === false || strlen($ct) < 16) {
             throw ValidationException::withMessages(['ciphertext' => ['Invalid message ciphertext.']]);
+        }
+    }
+
+    /**
+     * Structural validation for client-encrypted attachment manifest (opaque ciphertext fields).
+     *
+     * @param  array<string, mixed>  $data
+     */
+    public function validateAttachmentManifest(array $data): void
+    {
+        $v = Validator::make($data, [
+            'version' => ['required', 'string', 'in:'.self::ATTACHMENT_MANIFEST_VERSION],
+            'alg' => ['required', 'string', 'in:AES-256-GCM'],
+            'nonce' => ['required', 'string'],
+            'ciphertext' => ['required', 'string'],
+            'original_name_ciphertext' => ['nullable', 'string'],
+            'info' => ['required', 'string', 'max:512'],
+        ]);
+
+        if ($v->fails()) {
+            throw new ValidationException($v);
+        }
+
+        if ($this->requireBase64Length($data['nonce'], 12, 'nonce') === null) {
+            throw ValidationException::withMessages(['nonce' => ['Invalid attachment manifest nonce length.']]);
+        }
+
+        $ct = base64_decode($data['ciphertext'], true);
+        if ($ct === false || strlen($ct) < 16) {
+            throw ValidationException::withMessages(['ciphertext' => ['Invalid attachment manifest ciphertext.']]);
         }
     }
 

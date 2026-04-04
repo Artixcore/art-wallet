@@ -24,4 +24,16 @@ enum AjaxResponseCode: string
     case PartialSuccess = 'PARTIAL_SUCCESS';
     /** Data is older than freshness TTL; see meta.stale / meta.stale_subsystems. */
     case StaleData = 'STALE_DATA';
+    /** Participant must register a messaging identity key before this action. */
+    case MessagingKeyRequired = 'MESSAGING_KEY_REQUIRED';
+    /** Encrypted envelope failed structural validation (server does not decrypt). */
+    case CryptoEnvelopeInvalid = 'CRYPTO_ENVELOPE_INVALID';
+    /** Conversation does not exist or user is not a member. */
+    case MessagingConversationNotFound = 'MESSAGING_CONVERSATION_NOT_FOUND';
+    /** User exceeded attachment quota or size policy. */
+    case AttachmentQuotaExceeded = 'ATTACHMENT_QUOTA_EXCEEDED';
+    /** Encrypted blob could not be stored or verified. */
+    case AttachmentUploadFailed = 'ATTACHMENT_UPLOAD_FAILED';
+    /** Same idempotency key replayed; see meta.idempotent_replay. */
+    case MessagingIdempotencyReplay = 'MESSAGING_IDEMPOTENCY_REPLAY';
 }

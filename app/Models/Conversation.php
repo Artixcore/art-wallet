@@ -11,6 +11,7 @@ class Conversation extends Model
         'type',
         'public_id',
         'last_message_at',
+        'ck_version',
     ];
 
     /**
