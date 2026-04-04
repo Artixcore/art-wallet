@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1;
 
 use App\Domain\Chain\Exceptions\BroadcastRejectedException;
-use App\Domain\Chain\Exceptions\ChainAdapterException;
 use App\Domain\Notifications\Enums\NotificationCategory;
 use App\Domain\Notifications\Enums\NotificationSeverity;
 use App\Domain\Notifications\Services\NotificationFactory;
@@ -47,7 +46,7 @@ final class BroadcastController extends Controller
                 $row['signed_tx_hex'],
                 $idem,
             );
-        } catch (BroadcastRejectedException|ChainAdapterException) {
+        } catch (BroadcastRejectedException) {
             $resolved = NotificationMessageCatalog::resolve('tx.broadcast_failed');
 
             return AjaxEnvelope::error(

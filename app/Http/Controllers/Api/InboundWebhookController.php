@@ -20,7 +20,7 @@ final class InboundWebhookController extends Controller
 {
     public function verify(Request $request, OutboundWebhookSigner $signer, IntegrationEndpoint $integrationEndpoint): JsonResponse
     {
-        $payload = $request->all();
+        $raw = $request->getContent();
         $sig = (string) $request->header('X-ArtWallet-Signature', '');
         $ts = (string) $request->header('X-ArtWallet-Timestamp', '');
 
@@ -33,7 +33,7 @@ final class InboundWebhookController extends Controller
             )->toJsonResponse(422);
         }
 
-        if (! $signer->verify($plain, $ts, $sig, is_array($payload) ? $payload : [])) {
+        if (! $signer->verify($plain, $ts, $sig, $raw)) {
             return AjaxEnvelope::error(
                 AjaxResponseCode::InvalidRequest,
                 __('Invalid webhook signature or timestamp.'),

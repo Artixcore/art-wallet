@@ -32,15 +32,15 @@ final class OutboundWebhookSigner
     }
 
     /**
-     * @param  array<string, mixed>  $body
+     * Verifies HMAC over the raw JSON body bytes (must match the signed payload exactly).
      */
-    public function verify(string $secretPlain, string $timestamp, string $signature, array $body): bool
+    public function verify(string $secretPlain, string $timestamp, string $signature, string $rawJsonBody): bool
     {
         if (abs(time() - (int) $timestamp) > 300) {
             return false;
         }
 
-        $canonical = $timestamp."\n".json_encode($body, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES);
+        $canonical = $timestamp."\n".$rawJsonBody;
         $expected = hash_hmac('sha256', $canonical, $secretPlain);
 
         return hash_equals($expected, $signature);

@@ -9,6 +9,8 @@ use Laravel\Sanctum\PersonalAccessToken as SanctumPersonalAccessTokenBase;
 
 class SanctumPersonalAccessToken extends SanctumPersonalAccessTokenBase
 {
+    protected $table = 'personal_access_tokens';
+
     /**
      * @var list<string>
      */
