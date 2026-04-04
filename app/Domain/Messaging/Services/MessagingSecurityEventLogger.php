@@ -12,9 +12,10 @@ final class MessagingSecurityEventLogger
     {
         $key = 'messaging_sec_event:'.($user?->id ?? 'guest');
         $max = (int) config('messaging.security_event_rate_per_minute', 30);
-        if (! RateLimiter::attempt($key.':'.now()->format('Y-m-d-H-i'), $max, fn () => true)) {
+        if (RateLimiter::tooManyAttempts($key, $max)) {
             return;
         }
+        RateLimiter::hit($key, 60);
 
         MessagingSecurityEvent::query()->create([
             'user_id' => $user?->id,

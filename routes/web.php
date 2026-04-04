@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Web\CryptoPocController;
+use App\Http\Controllers\Web\MessagingWebController;
 use App\Http\Controllers\Web\NotificationsWebController;
 use App\Http\Controllers\Web\OperatorDashboardController;
 use App\Http\Controllers\Web\SecurityWebController;
@@ -36,6 +37,10 @@ Route::get('/wallet/transactions', [WalletTransactionsController::class, 'show']
 Route::get('/notifications', [NotificationsWebController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('notifications.index');
+
+Route::get('/messaging', [MessagingWebController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('messaging.index');
 
 Route::get('/operator', [OperatorDashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])

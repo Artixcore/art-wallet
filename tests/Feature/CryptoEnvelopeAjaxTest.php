@@ -132,22 +132,22 @@ final class CryptoEnvelopeAjaxTest extends TestCase
                 ['user_id' => $a->id, 'wrapped_conv_key' => $wrapA],
                 ['user_id' => $b->id, 'wrapped_conv_key' => $wrapB],
             ],
-        ])->assertOk();
+        ])->assertOk()->assertJsonPath('success', true);
 
-        $conversationId = (int) $res->json('conversation_id');
+        $conversationId = (int) $res->json('data.conversation_id');
 
         $this->actingAs($a)->postJson("/ajax/conversations/{$conversationId}/messages", [
             'ciphertext' => base64_encode(random_bytes(32)),
             'nonce' => base64_encode(random_bytes(12)),
             'alg' => 'AES-256-GCM',
             'version' => '1',
-        ])->assertOk()->assertJson(['message_index' => 0]);
+        ])->assertOk()->assertJsonPath('data.message_index', 0);
 
         $this->actingAs($b)->postJson("/ajax/conversations/{$conversationId}/messages", [
             'ciphertext' => base64_encode(random_bytes(32)),
             'nonce' => base64_encode(random_bytes(12)),
             'alg' => 'AES-256-GCM',
             'version' => '1',
-        ])->assertOk()->assertJson(['message_index' => 1]);
+        ])->assertOk()->assertJsonPath('data.message_index', 1);
     }
 }

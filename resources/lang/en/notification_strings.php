@@ -42,6 +42,17 @@ return [
             'body' => 'Large transaction alerts will trigger less often. Verify this matches your intent.',
         ],
     ],
+    'messaging' => [
+        'new_message' => [
+            'title' => 'New encrypted message',
+            'body' => 'You have a new message in conversation :conversation_public_id.',
+            'body_generic' => 'You have a new encrypted message.',
+        ],
+        'send_failed' => [
+            'title' => 'Message could not be sent securely',
+            'body' => 'The server did not accept your encrypted message. Nothing was delivered as a successful send.',
+        ],
+    ],
     'fallback' => [
         'title' => 'Notice',
     ],

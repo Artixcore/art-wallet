@@ -22,6 +22,9 @@
                     <x-nav-link :href="route('security.index')" :active="request()->routeIs('security.index')">
                         {{ __('Security') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('messaging.index')" :active="request()->routeIs('messaging.index')">
+                        {{ __('Messaging') }}
+                    </x-nav-link>
                     <x-nav-link :href="route('settings.index')" :active="request()->routeIs('settings.index')">
                         {{ __('Settings') }}
                     </x-nav-link>
@@ -116,6 +119,9 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('security.index')" :active="request()->routeIs('security.index')">
                 {{ __('Security') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('messaging.index')" :active="request()->routeIs('messaging.index')">
+                {{ __('Messaging') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('settings.index')" :active="request()->routeIs('settings.index')">
                 {{ __('Settings') }}

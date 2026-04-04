@@ -3,10 +3,12 @@
 use App\Http\Controllers\Api\BackupStateAjaxController;
 use App\Http\Controllers\Api\BroadcastAjaxController;
 use App\Http\Controllers\Api\ConversationAjaxController;
+use App\Http\Controllers\Api\ConversationReadAjaxController;
 use App\Http\Controllers\Api\DeviceChallengeAjaxController;
 use App\Http\Controllers\Api\FeeEstimateAjaxController;
 use App\Http\Controllers\Api\HealthAjaxController;
 use App\Http\Controllers\Api\MessageAjaxController;
+use App\Http\Controllers\Api\MessagingDeviceAjaxController;
 use App\Http\Controllers\Api\MessagingIdentityAjaxController;
 use App\Http\Controllers\Api\NetworkMetadataAjaxController;
 use App\Http\Controllers\Api\NotificationAjaxController;
@@ -113,10 +115,20 @@ Route::middleware(['auth', 'verified', 'throttle:30,1'])->prefix('ajax')->group(
 
 Route::middleware(['auth', 'verified', 'throttle:30,1'])->prefix('ajax')->group(function () {
     Route::put('/messaging/identity', [MessagingIdentityAjaxController::class, 'update'])->name('ajax.messaging.identity');
+    Route::post('/messaging/devices', [MessagingDeviceAjaxController::class, 'store'])
+        ->middleware('throttle:20,1')
+        ->name('ajax.messaging.devices.store');
+    Route::get('/conversations', [ConversationAjaxController::class, 'index'])->name('ajax.conversations.index');
     Route::post('/conversations', [ConversationAjaxController::class, 'store'])->name('ajax.conversations.store');
+    Route::get('/conversations/{conversation}/messages', [MessageAjaxController::class, 'index'])
+        ->whereNumber('conversation')
+        ->name('ajax.conversations.messages.index');
     Route::post('/conversations/{conversation}/messages', [MessageAjaxController::class, 'store'])
         ->whereNumber('conversation')
         ->name('ajax.conversations.messages.store');
+    Route::post('/conversations/{conversation}/read', [ConversationReadAjaxController::class, 'update'])
+        ->whereNumber('conversation')
+        ->name('ajax.conversations.read');
 });
 
 Route::middleware(['auth', 'verified', 'throttle:60,1'])->prefix('ajax/security')->group(function () {

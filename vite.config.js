@@ -13,6 +13,7 @@ export default defineConfig({
                 'resources/js/notifications.js',
                 'resources/js/settings-manager.js',
                 'resources/js/operator-dashboard.js',
+                'resources/js/secure-messaging.js',
             ],
             refresh: true,
         }),

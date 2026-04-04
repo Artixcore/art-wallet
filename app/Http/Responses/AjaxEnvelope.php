@@ -76,6 +76,30 @@ final class AjaxEnvelope
      * @param  array<string, mixed>  $data
      * @param  array<string, mixed>  $meta
      */
+    /**
+     * Successful response for a replayed idempotent messaging request (same logical send).
+     *
+     * @param  array<string, mixed>  $data
+     * @param  array<string, mixed>  $meta
+     */
+    public static function messagingIdempotentReplay(
+        string $message,
+        array $data = [],
+        array $meta = [],
+    ): self {
+        $correlationId = (string) Str::uuid();
+        $meta = array_merge(['correlation_id' => $correlationId], $meta);
+
+        return new self(
+            success: true,
+            code: AjaxResponseCode::MessagingIdempotencyReplay,
+            message: $message,
+            severity: NotificationSeverity::Info,
+            data: $data,
+            meta: $meta,
+        );
+    }
+
     public static function partialSuccess(
         string $message,
         array $data = [],

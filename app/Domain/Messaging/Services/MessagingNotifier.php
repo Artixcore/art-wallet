@@ -3,10 +3,12 @@
 namespace App\Domain\Messaging\Services;
 
 use App\Domain\Notifications\Enums\NotificationCategory;
+use App\Domain\Notifications\Enums\NotificationSeverity;
 use App\Domain\Notifications\Services\NotificationFactory;
 use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\User;
+use Illuminate\Support\Facades\URL;
 
 final class MessagingNotifier
 {
@@ -33,7 +35,7 @@ final class MessagingNotifier
                     'dedupe_key' => 'messaging:new:'.$message->id,
                     'subject_type' => Conversation::class,
                     'subject_id' => (int) $conversation->id,
-                    'action_url' => '/messaging?conversation='.urlencode((string) $conversation->public_id),
+                    'action_url' => URL::route('messaging.index').'?conversation='.urlencode((string) ($conversation->public_id ?? $conversation->id)),
                 ],
             );
         }
@@ -47,7 +49,7 @@ final class MessagingNotifier
             'messaging.send_failed',
             $conversationPublicId !== null ? ['conversation_public_id' => $conversationPublicId] : null,
             [
-                'severity' => \App\Domain\Notifications\Enums\NotificationSeverity::Danger,
+                'severity' => NotificationSeverity::Danger,
             ],
         );
     }

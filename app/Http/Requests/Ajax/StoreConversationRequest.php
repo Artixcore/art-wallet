@@ -3,10 +3,9 @@
 namespace App\Http\Requests\Ajax;
 
 use App\Services\CryptoEnvelopeValidator;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\ValidationException;
 
-class StoreConversationRequest extends FormRequest
+class StoreConversationRequest extends AjaxFormRequest
 {
     public function authorize(): bool
     {

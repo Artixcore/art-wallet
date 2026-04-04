@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Ajax;
 
-class UpdateMessagingIdentityRequest extends AjaxFormRequest
+class UpdateConversationReadRequest extends AjaxFormRequest
 {
     public function authorize(): bool
     {
@@ -15,7 +15,7 @@ class UpdateMessagingIdentityRequest extends AjaxFormRequest
     public function rules(): array
     {
         return [
-            'messaging_x25519_public_key' => ['required', 'string', 'max:128'],
+            'last_read_message_id' => ['required', 'integer', 'exists:messages,id'],
         ];
     }
 }

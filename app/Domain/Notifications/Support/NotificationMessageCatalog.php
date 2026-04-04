@@ -53,6 +53,16 @@ final class NotificationMessageCatalog
                 'title' => __('notification_strings.settings.risk_threshold_relaxed.title'),
                 'body' => __('notification_strings.settings.risk_threshold_relaxed.body'),
             ],
+            'messaging.new_message' => [
+                'title' => __('notification_strings.messaging.new_message.title'),
+                'body' => isset($params['conversation_public_id'])
+                    ? __('notification_strings.messaging.new_message.body', ['conversation_public_id' => (string) $params['conversation_public_id']])
+                    : __('notification_strings.messaging.new_message.body_generic'),
+            ],
+            'messaging.send_failed' => [
+                'title' => __('notification_strings.messaging.send_failed.title'),
+                'body' => __('notification_strings.messaging.send_failed.body'),
+            ],
             default => [
                 'title' => __('notification_strings.fallback.title'),
                 'body' => null,
@@ -66,9 +76,12 @@ final class NotificationMessageCatalog
             str_starts_with($titleKey, 'tx.broadcast_failed') => NotificationSeverity::Danger,
             str_starts_with($titleKey, 'tx.broadcast_success') => NotificationSeverity::Success,
             str_starts_with($titleKey, 'recovery_kit.') => NotificationSeverity::Success,
-            str_starts_with($titleKey, 'settings.security_policy_relaxed'),
-            str_starts_with($titleKey, 'settings.transaction_policy_relaxed'),
-            str_starts_with($titleKey, 'settings.messaging_privacy_weakened') => NotificationSeverity::Warning,
+            str_starts_with($titleKey, 'settings.security_policy_relaxed')
+                || str_starts_with($titleKey, 'settings.transaction_policy_relaxed')
+                || str_starts_with($titleKey, 'settings.messaging_privacy_weakened')
+                || str_starts_with($titleKey, 'settings.risk_threshold_relaxed') => NotificationSeverity::Warning,
+            str_starts_with($titleKey, 'messaging.send_failed') => NotificationSeverity::Danger,
+            str_starts_with($titleKey, 'messaging.') => NotificationSeverity::Info,
             default => NotificationSeverity::Info,
         };
     }
