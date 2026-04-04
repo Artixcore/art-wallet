@@ -119,10 +119,10 @@ final class SecurityCenterAjaxTest extends TestCase
 
         $this->actingAs($user)->postJson('/ajax/security/recovery-kit', [
             'recovery_kit' => $kit,
-        ])->assertOk()->assertJson(['ok' => true]);
+        ])->assertOk()->assertJsonPath('success', true);
 
         $this->actingAs($user)->getJson('/ajax/security/recovery-kit')
             ->assertOk()
-            ->assertJsonPath('recovery_kit.version', '1');
+            ->assertJsonPath('data.recovery_kit.version', '1');
     }
 }

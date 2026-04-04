@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Web\CryptoPocController;
+use App\Http\Controllers\Web\NotificationsWebController;
 use App\Http\Controllers\Web\SecurityWebController;
 use App\Http\Controllers\Web\WalletTransactionsController;
 use Illuminate\Support\Facades\Route;
@@ -25,6 +26,10 @@ Route::get('/security', [SecurityWebController::class, 'index'])
 Route::get('/wallet/transactions', [WalletTransactionsController::class, 'show'])
     ->middleware(['auth', 'verified'])
     ->name('wallet.transactions');
+
+Route::get('/notifications', [NotificationsWebController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('notifications.index');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

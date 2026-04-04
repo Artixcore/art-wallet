@@ -1,4 +1,5 @@
 import './bootstrap';
+import './nav-notifications.js';
 
 import Alpine from 'alpinejs';
 

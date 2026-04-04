@@ -28,8 +28,26 @@
                 </div>
             </div>
 
-            <!-- Settings Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
+            <!-- Notifications + Settings -->
+            <div class="hidden sm:flex sm:items-center sm:gap-2 sm:ms-6">
+                <div class="relative">
+                    <button type="button" id="nav-notif-bell" class="relative inline-flex items-center justify-center rounded-md p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" title="{{ __('Notifications') }}" aria-expanded="false" aria-haspopup="true">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        </svg>
+                        <span id="nav-notif-badge" class="hidden absolute -top-0.5 -right-0.5 min-w-[1.125rem] h-[1.125rem] px-1 flex items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white leading-none"></span>
+                    </button>
+                    <div id="nav-notif-panel" class="hidden absolute right-0 z-50 mt-2 w-80 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black/5">
+                        <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 px-3 py-2">
+                            <span class="text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('Recent') }}</span>
+                            <button type="button" id="nav-notif-mark-read" class="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline">{{ __('Mark all read') }}</button>
+                        </div>
+                        <ul id="nav-notif-list" class="max-h-72 overflow-y-auto py-1"></ul>
+                        <div class="border-t border-gray-100 dark:border-gray-700 px-3 py-2 text-center">
+                            <a href="{{ route('notifications.index') }}" class="text-sm font-medium text-indigo-600 dark:text-indigo-400">{{ __('View all') }}</a>
+                        </div>
+                    </div>
+                </div>
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-200 focus:outline-none transition ease-in-out duration-150">
@@ -93,6 +111,9 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('wallet.transactions')" :active="request()->routeIs('wallet.transactions')">
                 {{ __('Wallet') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('notifications.index')" :active="request()->routeIs('notifications.index')">
+                {{ __('Notifications') }}
             </x-responsive-nav-link>
         </div>
 

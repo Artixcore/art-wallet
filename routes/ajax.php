@@ -1,20 +1,21 @@
 <?php
 
 use App\Http\Controllers\Api\BackupStateAjaxController;
+use App\Http\Controllers\Api\BroadcastAjaxController;
 use App\Http\Controllers\Api\ConversationAjaxController;
 use App\Http\Controllers\Api\DeviceChallengeAjaxController;
+use App\Http\Controllers\Api\FeeEstimateAjaxController;
 use App\Http\Controllers\Api\HealthAjaxController;
 use App\Http\Controllers\Api\MessageAjaxController;
 use App\Http\Controllers\Api\MessagingIdentityAjaxController;
+use App\Http\Controllers\Api\NetworkMetadataAjaxController;
+use App\Http\Controllers\Api\NotificationAjaxController;
 use App\Http\Controllers\Api\RecoveryKitAjaxController;
 use App\Http\Controllers\Api\SecurityEventsAjaxController;
 use App\Http\Controllers\Api\SessionSecurityAjaxController;
-use App\Http\Controllers\Api\TrustedDeviceAjaxController;
-use App\Http\Controllers\Api\BroadcastAjaxController;
-use App\Http\Controllers\Api\FeeEstimateAjaxController;
-use App\Http\Controllers\Api\NetworkMetadataAjaxController;
 use App\Http\Controllers\Api\TransactionHistoryAjaxController;
 use App\Http\Controllers\Api\TransactionIntentAjaxController;
+use App\Http\Controllers\Api\TrustedDeviceAjaxController;
 use App\Http\Controllers\Api\WalletAddressAjaxController;
 use App\Http\Controllers\Api\WalletAjaxController;
 use App\Http\Controllers\Api\WalletListAjaxController;
@@ -23,6 +24,20 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'verified', 'throttle:120,1'])->prefix('ajax')->group(function () {
     Route::get('/health', [HealthAjaxController::class, 'show'])->name('ajax.health');
+});
+
+Route::middleware(['auth', 'verified', 'throttle:60,1'])->prefix('ajax')->group(function () {
+    Route::get('/notifications', [NotificationAjaxController::class, 'index'])->name('ajax.notifications.index');
+    Route::get('/notifications/dropdown', [NotificationAjaxController::class, 'dropdown'])->name('ajax.notifications.dropdown');
+    Route::post('/notifications/read-all', [NotificationAjaxController::class, 'markAllRead'])->name('ajax.notifications.read-all');
+    Route::post('/notifications/{in_app_notification}/read', [NotificationAjaxController::class, 'markRead'])
+        ->whereNumber('in_app_notification')
+        ->name('ajax.notifications.read');
+    Route::post('/notifications/{in_app_notification}/acknowledge', [NotificationAjaxController::class, 'acknowledge'])
+        ->whereNumber('in_app_notification')
+        ->name('ajax.notifications.acknowledge');
+    Route::get('/notifications/preferences', [NotificationAjaxController::class, 'preferences'])->name('ajax.notifications.preferences.show');
+    Route::put('/notifications/preferences', [NotificationAjaxController::class, 'updatePreferences'])->name('ajax.notifications.preferences.update');
 });
 
 Route::middleware(['auth', 'verified', 'throttle:12,1'])->prefix('ajax')->group(function () {

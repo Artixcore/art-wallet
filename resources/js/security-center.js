@@ -1,6 +1,8 @@
 import $ from 'jquery';
 import { generateMnemonic, validateMnemonic } from '@scure/bip39';
 import { wordlist } from '@scure/bip39/wordlists/english.js';
+import { apiPostJson } from './lib/artWalletAjax.js';
+import { confirmDanger, showToast } from './lib/artWalletUi.js';
 import { getOrCreateDeviceKeyPair, signChallengeMessage } from './lib/deviceLoginTrust.js';
 import { encryptRecoveryKit } from './lib/recoveryKit.js';
 
@@ -99,7 +101,15 @@ $('#sec-register-device').on('click', () => {
         })
         .fail((xhr) => {
             const err = xhr.responseJSON?.error;
-            alert(err === 'device_already_registered' ? 'This browser key is already registered.' : 'Registration failed.');
+            showToast({
+                title: err === 'device_already_registered' ? 'Already registered' : 'Registration failed',
+                text:
+                    err === 'device_already_registered'
+                        ? 'This browser key is already registered.'
+                        : 'Could not register this device.',
+                severity: 'danger',
+                timer: 6000,
+            });
         });
 });
 
@@ -111,7 +121,9 @@ $('#sec-create-challenge').on('click', () => {
             lastChallenge = res.challenge;
             $('#sec-challenge-new').text(JSON.stringify(res.challenge, null, 2));
         })
-        .fail(() => alert('Could not create challenge.'));
+        .fail(() =>
+            showToast({ title: 'Challenge failed', text: 'Could not create challenge.', severity: 'danger' }),
+        );
 });
 
 $('#sec-poll-status').on('click', () => {
@@ -119,7 +131,7 @@ $('#sec-poll-status').on('click', () => {
         .done((res) => {
             $('#sec-challenge-new').append(`\n\nstatus: ${JSON.stringify(res.challenge)}`);
         })
-        .fail(() => alert('Status failed.'));
+        .fail(() => showToast({ title: 'Status failed', severity: 'danger' }));
 });
 
 $('#sec-load-pending').on('click', () => {
@@ -127,21 +139,27 @@ $('#sec-load-pending').on('click', () => {
         .done((res) => {
             $('#sec-challenge-trusted').text(JSON.stringify(res.pending, null, 2));
         })
-        .fail(() => alert('Could not load pending.'));
+        .fail(() => showToast({ title: 'Could not load pending', severity: 'danger' }));
 });
 
 $('#sec-approve-first').on('click', async () => {
     const pendingRes = await $.getJSON('/ajax/security/challenges/pending');
     const first = pendingRes.pending && pendingRes.pending[0];
     if (!first) {
-        alert('No pending challenges.');
+        showToast({ title: 'No pending challenges', severity: 'info' });
+
         return;
     }
     const devicesRes = await $.getJSON('/ajax/security/trusted-devices');
     const { publicKeyB64, privateKeyB64 } = getOrCreateDeviceKeyPair(USER_ID);
     const device = devicesRes.devices.find((d) => d.public_key === publicKeyB64 && !d.revoked_at);
     if (!device) {
-        alert('This browser is not registered as a trusted device.');
+        showToast({
+            title: 'Not a trusted device',
+            text: 'This browser is not registered as a trusted device.',
+            severity: 'warning',
+        });
+
         return;
     }
     const msg = buildChallengeMessage(
@@ -160,7 +178,7 @@ $('#sec-approve-first').on('click', async () => {
         .done(() => {
             $('#sec-challenge-trusted').text('Approved. New device can poll status.');
         })
-        .fail(() => alert('Approval failed.'));
+        .fail(() => showToast({ title: 'Approval failed', severity: 'danger' }));
 });
 
 $('#sec-load-sessions').on('click', () => {
@@ -180,14 +198,21 @@ $('#sec-load-sessions').on('click', () => {
                 $ul.append($li);
             });
         })
-        .fail(() => alert('Could not load sessions.'));
+        .fail(() => showToast({ title: 'Could not load sessions', severity: 'danger' }));
 });
 
-$('#sec-revoke-others').on('click', () => {
-    if (!window.confirm('Log out all other sessions?')) return;
+$('#sec-revoke-others').on('click', async () => {
+    const ok = await confirmDanger({
+        title: 'Log out other sessions?',
+        text: 'This will sign out all other browsers using your account.',
+        confirmButtonText: 'Revoke others',
+    });
+    if (!ok) {
+        return;
+    }
     $.post('/ajax/security/sessions/revoke-others')
         .done(() => $('#sec-load-sessions').trigger('click'))
-        .fail(() => alert('Failed to revoke sessions.'));
+        .fail(() => showToast({ title: 'Failed to revoke sessions', severity: 'danger' }));
 });
 
 const KIT_VERSION = 1;
@@ -221,23 +246,17 @@ $('#sec-build-kit').on('click', async () => {
     }
 });
 
-$('#sec-upload-kit').on('click', () => {
+$('#sec-upload-kit').on('click', async () => {
     if (!lastKitEnvelope) {
         $('#sec-kit-msg').text('Build a kit first (or re-select file manually in a future version).');
         return;
     }
-    $.ajax({
-        url: '/ajax/security/recovery-kit',
-        type: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify({ recovery_kit: lastKitEnvelope }),
-    })
-        .done(() => {
-            $('#sec-kit-msg').text('Encrypted kit synced to server (server cannot decrypt).');
-        })
-        .fail(() => {
-            $('#sec-kit-msg').text('Upload failed.');
-        });
+    try {
+        await apiPostJson('/ajax/security/recovery-kit', { recovery_kit: lastKitEnvelope });
+        $('#sec-kit-msg').text('Encrypted kit synced to server (server cannot decrypt).');
+    } catch (e) {
+        $('#sec-kit-msg').text(e instanceof Error ? e.message : 'Upload failed.');
+    }
 });
 
 $('#sec-load-events').on('click', () => {
@@ -250,6 +269,6 @@ $('#sec-load-events').on('click', () => {
                 );
             });
         })
-        .fail(() => alert('Could not load events.'));
+        .fail(() => showToast({ title: 'Could not load events', severity: 'danger' }));
 });
 

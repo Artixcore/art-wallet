@@ -3,6 +3,8 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Domain\Notifications\Models\InAppNotification;
+use App\Domain\Notifications\Models\UserNotificationPreference;
 use Artixcore\ArtGate\Traits\HasArtGateRoles;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -55,6 +57,22 @@ class User extends Authenticatable
     public function recoveryKit(): HasOne
     {
         return $this->hasOne(RecoveryKit::class);
+    }
+
+    /**
+     * @return HasMany<InAppNotification, $this>
+     */
+    public function inAppNotifications(): HasMany
+    {
+        return $this->hasMany(InAppNotification::class);
+    }
+
+    /**
+     * @return HasMany<UserNotificationPreference, $this>
+     */
+    public function notificationPreferences(): HasMany
+    {
+        return $this->hasMany(UserNotificationPreference::class);
     }
 
     /**

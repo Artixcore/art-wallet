@@ -1,6 +1,7 @@
 import $ from 'jquery';
 import QRCode from 'qrcode';
 import { ethers } from 'ethers';
+import { apiGetJson, apiPostJson, getEnvelopeData } from './lib/artWalletAjax.js';
 import { decryptWalletVault } from './lib/walletVault.js';
 import { signOutgoingEvmIntent } from './lib/evmSign.js';
 
@@ -21,29 +22,13 @@ function setStatus(el, msg, isError = false) {
 }
 
 async function apiGet(url) {
-    return new Promise((resolve, reject) => {
-        $.getJSON(url)
-            .done(resolve)
-            .fail((xhr) => reject(new Error(xhr.responseJSON?.message || xhr.statusText || 'Request failed')));
-    });
+    return apiGetJson(url);
 }
 
 async function apiPost(url, data, idempotencyKey = null) {
-    return new Promise((resolve, reject) => {
-        const headers = {};
-        if (idempotencyKey) {
-            headers['Idempotency-Key'] = idempotencyKey;
-        }
-        $.ajax({
-            url,
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(data),
-            headers,
-        })
-            .done(resolve)
-            .fail((xhr) => reject(new Error(xhr.responseJSON?.message || xhr.statusText || 'Request failed')));
-    });
+    const ajaxOptions = idempotencyKey ? { headers: { 'Idempotency-Key': idempotencyKey } } : {};
+
+    return apiPostJson(url, data, ajaxOptions);
 }
 
 function chainToSlug(chain) {
@@ -299,7 +284,7 @@ $('#wt-sign-broadcast').on('click', async () => {
             asset: payload.intent.asset,
         });
         const idem = crypto.randomUUID();
-        const out = await apiPost(
+        const env = await apiPost(
             `/ajax/wallets/${selectedWalletId}/transaction-intents/${payload.intent.id}/broadcast`,
             {
                 server_nonce: payload.signing_request.server_nonce,
@@ -307,9 +292,11 @@ $('#wt-sign-broadcast').on('click', async () => {
             },
             idem,
         );
-        setStatus('#wt-send-status', `Broadcast ok. Txid: ${out.txid}`, false);
+        const data = getEnvelopeData(env);
+        const txid = typeof data.txid === 'string' ? data.txid : '';
+        setStatus('#wt-send-status', `Broadcast ok. Txid: ${txid}`, false);
     } catch (e) {
-        setStatus('#wt-send-status', e.message, true);
+        setStatus('#wt-send-status', e instanceof Error ? e.message : 'Broadcast failed', true);
     } finally {
         btn.prop('disabled', false);
     }
