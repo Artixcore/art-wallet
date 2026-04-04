@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\HealthAjaxController;
 use App\Http\Controllers\Api\MessageAjaxController;
 use App\Http\Controllers\Api\MessagingDeviceAjaxController;
 use App\Http\Controllers\Api\MessagingIdentityAjaxController;
+use App\Http\Controllers\Api\MessagingSolAddressAjaxController;
 use App\Http\Controllers\Api\NetworkMetadataAjaxController;
 use App\Http\Controllers\Api\NotificationAjaxController;
 use App\Http\Controllers\Api\OperatorDashboardAjaxController;
@@ -115,6 +116,9 @@ Route::middleware(['auth', 'verified', 'throttle:30,1'])->prefix('ajax')->group(
 
 Route::middleware(['auth', 'verified', 'throttle:30,1'])->prefix('ajax')->group(function () {
     Route::put('/messaging/identity', [MessagingIdentityAjaxController::class, 'update'])->name('ajax.messaging.identity');
+    Route::post('/messaging/resolve-sol-address', [MessagingSolAddressAjaxController::class, 'resolve'])
+        ->middleware('throttle:messaging-resolve')
+        ->name('ajax.messaging.resolve-sol-address');
     Route::post('/messaging/devices', [MessagingDeviceAjaxController::class, 'store'])
         ->middleware('throttle:20,1')
         ->name('ajax.messaging.devices.store');

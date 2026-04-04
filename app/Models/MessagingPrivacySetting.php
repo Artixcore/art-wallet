@@ -13,6 +13,9 @@ class MessagingPrivacySetting extends Model
         'typing_indicators_enabled',
         'max_attachment_mb',
         'safety_warnings_enabled',
+        'discoverable_by_sol_address',
+        'require_dm_approval',
+        'hide_profile_until_dm_accepted',
         'settings_version',
     ];
 
@@ -26,6 +29,8 @@ class MessagingPrivacySetting extends Model
             'typing_indicators_enabled' => 'boolean',
             'max_attachment_mb' => 'integer',
             'safety_warnings_enabled' => 'boolean',
+            'require_dm_approval' => 'boolean',
+            'hide_profile_until_dm_accepted' => 'boolean',
             'settings_version' => 'integer',
         ];
     }

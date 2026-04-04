@@ -164,6 +164,10 @@ final class AjaxEnvelope
     /**
      * @param  array<string, mixed>  $meta
      */
+    /**
+     * @param  array<string, mixed>  $data
+     * @param  array<string, mixed>  $meta
+     */
     public static function error(
         AjaxResponseCode $code,
         string $message,
@@ -171,6 +175,7 @@ final class AjaxEnvelope
         ?array $toast = null,
         ?array $modal = null,
         array $meta = [],
+        array $data = [],
     ): self {
         $correlationId = (string) Str::uuid();
         $meta = array_merge(['correlation_id' => $correlationId], $meta);
@@ -180,6 +185,7 @@ final class AjaxEnvelope
             code: $code,
             message: $message,
             severity: $severity,
+            data: $data,
             meta: $meta,
             toast: $toast,
             modal: $modal,

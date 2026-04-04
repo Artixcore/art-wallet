@@ -125,7 +125,7 @@ final class SettingsCenterApplicationService
     }
 
     /**
-     * @param  array{read_receipts_enabled: bool, typing_indicators_enabled: bool, max_attachment_mb: int, safety_warnings_enabled: bool, settings_version: int}  $data
+     * @param  array{read_receipts_enabled: bool, typing_indicators_enabled: bool, max_attachment_mb: int, safety_warnings_enabled: bool, discoverable_by_sol_address: string, require_dm_approval: bool, hide_profile_until_dm_accepted: bool, settings_version: int}  $data
      * @return array<string, mixed>
      */
     public function updateMessagingPrivacy(User $user, array $data, ?string $stepUpToken, Request $request): array
@@ -138,12 +138,21 @@ final class SettingsCenterApplicationService
                 throw new SettingsConflictException;
             }
 
-            $needsStepUp = $this->risk->messagingPrivacyNeedsStepUp(
+            $needsStepUpSafety = $this->risk->messagingPrivacyNeedsStepUp(
                 (bool) $row->safety_warnings_enabled,
                 (bool) $data['safety_warnings_enabled'],
             );
 
-            if ($needsStepUp) {
+            $needsStepUpDiscoverability = $this->risk->messagingDiscoverabilityNeedsStepUp(
+                (string) $row->discoverable_by_sol_address,
+                (string) $data['discoverable_by_sol_address'],
+                (bool) $row->require_dm_approval,
+                (bool) $data['require_dm_approval'],
+                (bool) $row->hide_profile_until_dm_accepted,
+                (bool) $data['hide_profile_until_dm_accepted'],
+            );
+
+            if ($needsStepUpSafety || $needsStepUpDiscoverability) {
                 $this->stepUp->assertValidAndConsume($user, $stepUpToken);
             }
 
@@ -152,13 +161,16 @@ final class SettingsCenterApplicationService
             $row->typing_indicators_enabled = (bool) $data['typing_indicators_enabled'];
             $row->max_attachment_mb = (int) $data['max_attachment_mb'];
             $row->safety_warnings_enabled = (bool) $data['safety_warnings_enabled'];
+            $row->discoverable_by_sol_address = (string) $data['discoverable_by_sol_address'];
+            $row->require_dm_approval = (bool) $data['require_dm_approval'];
+            $row->hide_profile_until_dm_accepted = (bool) $data['hide_profile_until_dm_accepted'];
             $row->settings_version = $row->settings_version + 1;
             $row->save();
 
             $this->audit->logChange($user, 'messaging', null, 'safety_warnings_enabled', $oldSafety, $row->safety_warnings_enabled, $request);
             $this->audit->logAuditAction($user, 'settings.messaging_privacy.updated', $request, ['settings_version' => $row->settings_version]);
 
-            if ($needsStepUp) {
+            if ($needsStepUpSafety) {
                 $this->notify->notifyMessagingPrivacyWeakened($user);
             }
 

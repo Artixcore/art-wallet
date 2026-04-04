@@ -47,6 +47,9 @@ final class SettingsResolver
                     'typing_indicators_enabled' => true,
                     'max_attachment_mb' => 10,
                     'safety_warnings_enabled' => true,
+                    'discoverable_by_sol_address' => 'off',
+                    'require_dm_approval' => false,
+                    'hide_profile_until_dm_accepted' => true,
                     'settings_version' => 1,
                 ],
             );
@@ -153,6 +156,9 @@ final class SettingsResolver
             'typing_indicators_enabled' => $m->typing_indicators_enabled,
             'max_attachment_mb' => $m->max_attachment_mb,
             'safety_warnings_enabled' => $m->safety_warnings_enabled,
+            'discoverable_by_sol_address' => $m->discoverable_by_sol_address,
+            'require_dm_approval' => $m->require_dm_approval,
+            'hide_profile_until_dm_accepted' => $m->hide_profile_until_dm_accepted,
             'settings_version' => $m->settings_version,
         ];
     }

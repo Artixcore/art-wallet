@@ -59,6 +59,9 @@ function applySnapshot(snap) {
     $('#set-typing').prop('checked', msg.typing_indicators_enabled !== false);
     $('#set-att').val(String(msg.max_attachment_mb ?? 10));
     $('#set-safe').prop('checked', msg.safety_warnings_enabled !== false);
+    $('#set-sol-discover').val(String(msg.discoverable_by_sol_address ?? 'off'));
+    $('#set-dm-approval').prop('checked', msg.require_dm_approval === true);
+    $('#set-hide-profile').prop('checked', msg.hide_profile_until_dm_accepted !== false);
     $('#set-messaging-version').val(String(msg.settings_version ?? 1));
 
     const risk = /** @type {Record<string, unknown>} */ (snap.risk_thresholds || {});
@@ -199,6 +202,9 @@ $('#form-messaging-privacy').on('submit', (e) => {
         typing_indicators_enabled: $('#set-typing').is(':checked'),
         max_attachment_mb: Number($('#set-att').val()),
         safety_warnings_enabled: $('#set-safe').is(':checked'),
+        discoverable_by_sol_address: String($('#set-sol-discover').val()),
+        require_dm_approval: $('#set-dm-approval').is(':checked'),
+        hide_profile_until_dm_accepted: $('#set-hide-profile').is(':checked'),
         settings_version: Number($('#set-messaging-version').val()),
     };
     if (stepUpToken) {

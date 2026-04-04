@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Domain\Chain\ChainAdapterResolver;
+use App\Domain\Messaging\Services\VerifiedWalletAddressSyncService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Ajax\SyncWalletAddressesRequest;
 use App\Models\SupportedNetwork;
@@ -13,7 +14,7 @@ use Illuminate\Support\Facades\DB;
 
 class WalletAddressAjaxController extends Controller
 {
-    public function sync(SyncWalletAddressesRequest $request, Wallet $wallet, ChainAdapterResolver $adapters): JsonResponse
+    public function sync(SyncWalletAddressesRequest $request, Wallet $wallet, ChainAdapterResolver $adapters, VerifiedWalletAddressSyncService $verifiedSol): JsonResponse
     {
         $this->authorize('manageAddresses', $wallet);
 
@@ -47,6 +48,12 @@ class WalletAddressAjaxController extends Controller
                 );
             }
         });
+
+        foreach ($normalizedRows as [$network, $normalized]) {
+            if ($network->chain === 'SOL') {
+                $verifiedSol->syncSolAddressFromWallet($wallet, $normalized);
+            }
+        }
 
         $synced = $wallet->walletAddresses()->with('supportedNetwork')->get();
 

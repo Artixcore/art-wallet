@@ -55,6 +55,41 @@ final class SettingsRiskEvaluator
         return $currentSafety && ! $newSafety;
     }
 
+    /**
+     * Stricter discoverability or weaker DM gates require password verification.
+     */
+    public function messagingDiscoverabilityNeedsStepUp(
+        string $oldDiscoverability,
+        string $newDiscoverability,
+        bool $oldRequireDmApproval,
+        bool $newRequireDmApproval,
+        bool $oldHideProfile,
+        bool $newHideProfile,
+    ): bool {
+        $rank = [
+            'off' => 0,
+            'contacts_only' => 1,
+            'all_verified_users' => 2,
+        ];
+
+        $oldR = $rank[$oldDiscoverability] ?? 0;
+        $newR = $rank[$newDiscoverability] ?? 0;
+
+        if ($newR > $oldR) {
+            return true;
+        }
+
+        if ($oldRequireDmApproval && ! $newRequireDmApproval) {
+            return true;
+        }
+
+        if ($oldHideProfile && ! $newHideProfile) {
+            return true;
+        }
+
+        return false;
+    }
+
     public function riskThresholdNeedsStepUp(?string $oldFiat, ?string $newFiat): bool
     {
         if ($oldFiat === null || $newFiat === null) {

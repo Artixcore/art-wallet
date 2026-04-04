@@ -40,4 +40,12 @@ enum AjaxResponseCode: string
     case AttachmentUploadFailed = 'ATTACHMENT_UPLOAD_FAILED';
     /** Same idempotency key replayed; see meta.idempotent_replay. */
     case MessagingIdempotencyReplay = 'MESSAGING_IDEMPOTENCY_REPLAY';
+    /** Solana address input failed Base58 / public key validation. */
+    case SolAddressInvalid = 'SOL_ADDRESS_INVALID';
+    /** Searcher attempted to resolve their own verified Sol address. */
+    case MessagingSelfConversation = 'MESSAGING_SELF_CONVERSATION';
+    /** Sol-address discovery blocked by recipient privacy settings. */
+    case MessagingDiscoveryDenied = 'MESSAGING_DISCOVERY_DENIED';
+    /** DM requires approval before a new thread can be opened. */
+    case MessagingDmRequiresApproval = 'MESSAGING_DM_REQUIRES_APPROVAL';
 }

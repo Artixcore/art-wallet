@@ -108,6 +108,10 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(20)->by((string) ($request->user()?->getAuthIdentifier() ?? $request->ip()));
         });
 
+        RateLimiter::for('messaging-resolve', function (Request $request): Limit {
+            return Limit::perMinute(20)->by((string) ($request->user()?->getAuthIdentifier() ?? $request->ip()));
+        });
+
         RateLimiter::for('webhook-inbound', function (Request $request): Limit {
             return Limit::perMinute(60)->by($request->ip());
         });

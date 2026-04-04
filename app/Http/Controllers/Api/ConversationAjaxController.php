@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Domain\Messaging\Services\DirectConversationLookupService;
+use App\Domain\Messaging\Services\DirectConversationRegistrationService;
 use App\Domain\Notifications\Enums\NotificationSeverity;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Ajax\StoreConversationRequest;
@@ -18,6 +20,11 @@ use Illuminate\Support\Facades\DB;
 
 class ConversationAjaxController extends Controller
 {
+    public function __construct(
+        private readonly DirectConversationLookupService $directLookup,
+        private readonly DirectConversationRegistrationService $directRegistration,
+    ) {}
+
     public function index(Request $request): JsonResponse
     {
         $userId = (int) $request->user()->id;
@@ -94,6 +101,29 @@ class ConversationAjaxController extends Controller
             )->toJsonResponse(422);
         }
 
+        if ($type === 'direct' && count($wraps) === 2) {
+            $a = (int) $wraps[0]['user_id'];
+            $b = (int) $wraps[1]['user_id'];
+            $existingId = $this->directLookup->findConversationIdForPair($a, $b);
+            if ($existingId !== null) {
+                $existing = Conversation::query()->find($existingId);
+
+                return AjaxEnvelope::error(
+                    AjaxResponseCode::Conflict,
+                    __('A direct conversation with this user already exists.'),
+                    NotificationSeverity::Warning,
+                    meta: [
+                        'retryable' => false,
+                        'client_behavior' => 'open_existing',
+                        'existing_conversation' => [
+                            'conversation_id' => $existingId,
+                            'public_id' => $existing?->public_id,
+                        ],
+                    ],
+                )->toJsonResponse(409);
+            }
+        }
+
         $conversation = DB::transaction(function () use ($request, $wraps, $creatorId, $type) {
             $conv = Conversation::query()->create([
                 'type' => $type,
@@ -109,6 +139,14 @@ class ConversationAjaxController extends Controller
                     'wrapped_conv_key_ciphertext' => $w['wrapped_json'],
                     'wrapped_ck_version' => 1,
                 ]);
+            }
+
+            if ($type === 'direct' && count($wraps) === 2) {
+                $this->directRegistration->registerDirectConversation(
+                    $conv,
+                    (int) $wraps[0]['user_id'],
+                    (int) $wraps[1]['user_id'],
+                );
             }
 
             return $conv;

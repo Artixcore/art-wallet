@@ -10,6 +10,7 @@ use App\Domain\Chain\DTO\FeeEstimateResult;
 use App\Domain\Chain\Exceptions\BroadcastRejectedException;
 use App\Domain\Chain\Exceptions\ChainAdapterException;
 use App\Domain\Chain\Exceptions\TamperedTransactionException;
+use App\Domain\Messaging\Services\SolanaPublicKeyValidator;
 use App\Models\Asset;
 use App\Models\BlockchainTransaction;
 use App\Models\SupportedNetwork;
@@ -18,6 +19,10 @@ use Illuminate\Support\Facades\Http;
 
 final class SolanaAdapter implements ChainAdapterInterface
 {
+    public function __construct(
+        private readonly SolanaPublicKeyValidator $solanaPublicKeyValidator,
+    ) {}
+
     public function supports(SupportedNetwork $network): bool
     {
         return $network->chain === 'SOL';
@@ -25,16 +30,12 @@ final class SolanaAdapter implements ChainAdapterInterface
 
     public function validateAddress(string $address, SupportedNetwork $network): bool
     {
-        if (strlen($address) < 32 || strlen($address) > 50) {
-            return false;
-        }
-
-        return (bool) preg_match('/^[1-9A-HJ-NP-Za-km-z]+$/', $address);
+        return $this->solanaPublicKeyValidator->isValid($address);
     }
 
     public function normalizeAddress(string $address, SupportedNetwork $network): string
     {
-        return $address;
+        return $this->solanaPublicKeyValidator->validateAndNormalize($address);
     }
 
     public function buildConstructionPayload(TransactionIntent $intent, Asset $asset): array

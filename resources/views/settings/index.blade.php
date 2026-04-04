@@ -95,6 +95,23 @@
                         <input type="checkbox" id="set-safe" name="safety_warnings_enabled" class="rounded border-gray-300 dark:border-gray-600" />
                         <label for="set-safe" class="text-sm text-gray-700 dark:text-gray-300">{{ __('Safety warnings') }}</label>
                     </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" for="set-sol-discover">{{ __('Discoverable by verified Solana address') }}</label>
+                        <select id="set-sol-discover" name="discoverable_by_sol_address" class="mt-1 w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 text-sm shadow-sm">
+                            <option value="off">{{ __('Off (recommended)') }}</option>
+                            <option value="contacts_only">{{ __('Contacts only (prior direct chats)') }}</option>
+                            <option value="all_verified_users">{{ __('All verified ArtWallet users') }}</option>
+                        </select>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('Controls whether others can find you by a Solana address you verified through wallet sync.') }}</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" id="set-dm-approval" name="require_dm_approval" class="rounded border-gray-300 dark:border-gray-600" />
+                        <label for="set-dm-approval" class="text-sm text-gray-700 dark:text-gray-300">{{ __('Require approval for new direct messages') }}</label>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" id="set-hide-profile" name="hide_profile_until_dm_accepted" class="rounded border-gray-300 dark:border-gray-600" />
+                        <label for="set-hide-profile" class="text-sm text-gray-700 dark:text-gray-300">{{ __('Hide display name until conversation is allowed') }}</label>
+                    </div>
                     <input type="hidden" id="set-messaging-version" name="settings_version" value="1" />
                     <button type="button" id="btn-step-up-msg" class="rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-medium text-gray-800 dark:text-gray-200">{{ __('Verify password') }}</button>
                     <button type="submit" class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500">{{ __('Save messaging settings') }}</button>
