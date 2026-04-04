@@ -3,6 +3,7 @@
 use App\Jobs\PollTransactionStatusJob;
 use App\Jobs\PruneExpiredDeviceChallengesJob;
 use App\Jobs\PruneExpiredIntentsJob;
+use App\Jobs\RunObservabilityProbesJob;
 use App\Models\BlockchainTransaction;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -28,3 +29,7 @@ Schedule::call(function (): void {
         ->pluck('id')
         ->each(fn (int $id) => PollTransactionStatusJob::dispatch($id));
 })->everyMinute()->name('artwallet-poll-pending-transactions');
+
+Schedule::job(new RunObservabilityProbesJob)
+    ->everyTwoMinutes()
+    ->name('artwallet-observability-probes');

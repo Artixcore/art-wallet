@@ -25,6 +25,11 @@
                     <x-nav-link :href="route('settings.index')" :active="request()->routeIs('settings.index')">
                         {{ __('Settings') }}
                     </x-nav-link>
+                    @can('ops.dashboard.view')
+                        <x-nav-link :href="route('operator.dashboard')" :active="request()->routeIs('operator.dashboard')">
+                            {{ __('Operator') }}
+                        </x-nav-link>
+                    @endcan
                     <x-nav-link :href="route('wallet.transactions')" :active="request()->routeIs('wallet.transactions')">
                         {{ __('Wallet') }}
                     </x-nav-link>
@@ -115,6 +120,11 @@
             <x-responsive-nav-link :href="route('settings.index')" :active="request()->routeIs('settings.index')">
                 {{ __('Settings') }}
             </x-responsive-nav-link>
+            @can('ops.dashboard.view')
+                <x-responsive-nav-link :href="route('operator.dashboard')" :active="request()->routeIs('operator.dashboard')">
+                    {{ __('Operator') }}
+                </x-responsive-nav-link>
+            @endcan
             <x-responsive-nav-link :href="route('wallet.transactions')" :active="request()->routeIs('wallet.transactions')">
                 {{ __('Wallet') }}
             </x-responsive-nav-link>

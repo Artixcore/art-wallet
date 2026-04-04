@@ -9,6 +9,17 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * Unified AJAX JSON envelope for ArtWallet.
+ *
+ * **Observability / operator dashboard `meta` keys** (optional, backward compatible):
+ * - `partial` (bool): one or more subsystems failed to load; prefer {@see self::partialSuccess()}.
+ * - `stale` (bool): data is older than freshness TTL.
+ * - `stale_subsystems` (list<string>): subsystem ids that exceeded TTL.
+ * - `subsystem_status` (array<string, string>): map of subsystem id to rollup status (e.g. healthy, stale, unknown).
+ * - `actions` (array): e.g. `requires_step_up`, `confirm_token` for remediation flows.
+ * - `server_time` (string ISO8601): server snapshot time for the response.
+ */
 final class AjaxEnvelope
 {
     /**
@@ -56,6 +67,52 @@ final class AjaxEnvelope
             toast: $toast,
             notification: $notification,
         );
+    }
+
+    /**
+     * Success with {@see AjaxResponseCode::PartialSuccess}: some dashboard sections failed;
+     * never implies full system health.
+     *
+     * @param  array<string, mixed>  $data
+     * @param  array<string, mixed>  $meta
+     */
+    public static function partialSuccess(
+        string $message,
+        array $data = [],
+        NotificationSeverity $severity = NotificationSeverity::Warning,
+        array $meta = [],
+    ): self {
+        $correlationId = (string) Str::uuid();
+        $meta = array_merge(['correlation_id' => $correlationId], $meta);
+        $meta['partial'] = true;
+
+        return new self(
+            success: true,
+            code: AjaxResponseCode::PartialSuccess,
+            message: $message !== '' ? $message : __('Partial data loaded.'),
+            severity: $severity,
+            data: $data,
+            meta: $meta,
+        );
+    }
+
+    /**
+     * @param  array<string, mixed>  $meta  Merged into envelope meta (caller may set partial/stale flags).
+     */
+    public static function withObservabilityMeta(
+        bool $partial,
+        bool $stale,
+        array $staleSubsystems,
+        array $subsystemStatus,
+        array $meta = [],
+    ): array {
+        return array_merge($meta, [
+            'partial' => $partial,
+            'stale' => $stale,
+            'stale_subsystems' => $staleSubsystems,
+            'subsystem_status' => $subsystemStatus,
+            'server_time' => now()->toIso8601String(),
+        ]);
     }
 
     /**

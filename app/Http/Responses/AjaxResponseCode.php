@@ -20,4 +20,8 @@ enum AjaxResponseCode: string
     case Conflict = 'CONFLICT';
     case StepUpRequired = 'STEP_UP_REQUIRED';
     case PolicyRejected = 'POLICY_REJECTED';
+    /** Dashboard loaded with one or more subsystem failures; see meta.partial / meta.subsystems. */
+    case PartialSuccess = 'PARTIAL_SUCCESS';
+    /** Data is older than freshness TTL; see meta.stale / meta.stale_subsystems. */
+    case StaleData = 'STALE_DATA';
 }

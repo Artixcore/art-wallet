@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\MessageAjaxController;
 use App\Http\Controllers\Api\MessagingIdentityAjaxController;
 use App\Http\Controllers\Api\NetworkMetadataAjaxController;
 use App\Http\Controllers\Api\NotificationAjaxController;
+use App\Http\Controllers\Api\OperatorDashboardAjaxController;
 use App\Http\Controllers\Api\RecoveryKitAjaxController;
 use App\Http\Controllers\Api\SecurityEventsAjaxController;
 use App\Http\Controllers\Api\SessionSecurityAjaxController;
@@ -27,6 +28,13 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'verified', 'throttle:120,1'])->prefix('ajax')->group(function () {
     Route::get('/health', [HealthAjaxController::class, 'show'])->name('ajax.health');
+});
+
+Route::middleware(['auth', 'verified', 'throttle:30,1'])->prefix('ajax/operator')->group(function () {
+    Route::get('/summary', [OperatorDashboardAjaxController::class, 'summary'])->name('ajax.operator.summary');
+    Route::post('/probes/run', [OperatorDashboardAjaxController::class, 'runProbes'])
+        ->middleware('throttle:12,1')
+        ->name('ajax.operator.probes.run');
 });
 
 Route::middleware(['auth', 'verified', 'throttle:60,1'])->prefix('ajax/settings')->group(function () {

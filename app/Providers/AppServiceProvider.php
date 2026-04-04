@@ -7,8 +7,10 @@ use App\Domain\Chain\Adapters\EthereumAdapter;
 use App\Domain\Chain\Adapters\SolanaAdapter;
 use App\Domain\Chain\Adapters\TronAdapter;
 use App\Domain\Chain\ChainAdapterResolver;
+use App\Domain\Observability\Services\OperatorGate;
 use App\Listeners\RegisterUserSessionOnLogin;
 use App\Listeners\RevokeUserSessionOnLogout;
+use App\Models\User;
 use App\Rbac\ComparingPermissionResolver;
 use Artixcore\ArtGate\Contracts\AuthorizationRepository;
 use Artixcore\ArtGate\Contracts\PermissionResolverInterface;
@@ -19,6 +21,7 @@ use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Psr\Log\LoggerInterface;
@@ -52,7 +55,26 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(Login::class, RegisterUserSessionOnLogin::class);
         Event::listen(Logout::class, RevokeUserSessionOnLogout::class);
 
+        $this->registerOperatorGates();
         $this->registerRbacCompareMode();
+    }
+
+    /**
+     * Map config/observability.php permission names to OperatorGate (is_admin OR ArtGate).
+     */
+    private function registerOperatorGates(): void
+    {
+        $this->app->singleton(OperatorGate::class);
+
+        foreach (config('observability.permissions', []) as $key => $permissionName) {
+            if (! is_string($permissionName) || $permissionName === '') {
+                continue;
+            }
+
+            Gate::define($permissionName, static function (User $user) use ($key): bool {
+                return app(OperatorGate::class)->allows($user, (string) $key);
+            });
+        }
     }
 
     /**

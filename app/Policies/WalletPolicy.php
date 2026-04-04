@@ -16,4 +16,9 @@ class WalletPolicy
     {
         return $this->view($user, $wallet);
     }
+
+    public function createTransactionIntent(User $user, Wallet $wallet): bool
+    {
+        return $this->view($user, $wallet);
+    }
 }

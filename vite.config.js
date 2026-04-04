@@ -12,6 +12,7 @@ export default defineConfig({
                 'resources/js/wallet-transactions.js',
                 'resources/js/notifications.js',
                 'resources/js/settings-manager.js',
+                'resources/js/operator-dashboard.js',
             ],
             refresh: true,
         }),
