@@ -2,6 +2,7 @@
 
 use App\Domain\Notifications\Enums\NotificationSeverity;
 use App\Domain\Settings\Exceptions\SettingsConflictException;
+use App\Http\Middleware\EnsureApiDeviceBinding;
 use App\Http\Middleware\RecordSessionActivity;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\ValidateOpsMonitorToken;
@@ -35,7 +36,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'ops.monitor' => ValidateOpsMonitorToken::class,
-            'api.device' => \App\Http\Middleware\EnsureApiDeviceBinding::class,
+            'api.device' => EnsureApiDeviceBinding::class,
         ]);
         $middleware->appendToGroup('web', [
             SecurityHeaders::class,
@@ -120,7 +121,7 @@ return Application::configure(basePath: dirname(__DIR__))
             )->toJsonResponse(404);
         });
 
-        $exceptions->render(function (\Throwable $e, Request $request) use ($ajaxAware) {
+        $exceptions->render(function (Throwable $e, Request $request) use ($ajaxAware) {
             if (! $ajaxAware($request) || config('app.debug')) {
                 return null;
             }

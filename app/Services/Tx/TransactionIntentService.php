@@ -71,7 +71,7 @@ final class TransactionIntentService
         $expiresAt = now()->addMinutes($ttlMin);
         $signTtlMin = (int) config('artwallet_chains.signing_request_ttl_minutes', 10);
 
-        return DB::transaction(function () use ($wallet, $asset, $network, $fromAddress, $toNormalized, $amount, $memo, $hash, $expiresAt, $signTtlMin, $data, $canonicalFields) {
+        return DB::transaction(function () use ($wallet, $asset, $network, $fromAddress, $toNormalized, $amount, $memo, $hash, $expiresAt, $signTtlMin, $data) {
             $intent = TransactionIntent::query()->create([
                 'user_id' => $wallet->user_id,
                 'wallet_id' => $wallet->id,

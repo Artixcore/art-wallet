@@ -6,6 +6,7 @@ namespace App\Domain\Chain\Contracts;
 
 use App\Domain\Chain\DTO\BroadcastResult;
 use App\Domain\Chain\DTO\FeeEstimateResult;
+use App\Domain\Chain\Exceptions\TamperedTransactionException;
 use App\Models\Asset;
 use App\Models\SupportedNetwork;
 use App\Models\TransactionIntent;
@@ -39,7 +40,7 @@ interface ChainAdapterInterface
     /**
      * Verify parsed signed transaction matches intent (chain-specific).
      *
-     * @throws \App\Domain\Chain\Exceptions\TamperedTransactionException
+     * @throws TamperedTransactionException
      */
     public function assertSignedTxMatchesIntent(
         TransactionIntent $intent,

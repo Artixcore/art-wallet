@@ -8,6 +8,7 @@ use App\Domain\Chain\ChainAdapterResolver;
 use App\Models\Asset;
 use App\Models\FeeEstimate;
 use App\Models\SupportedNetwork;
+use Carbon\Carbon;
 
 final class FeeQuoteService
 {
@@ -40,7 +41,7 @@ final class FeeQuoteService
             'supported_network_id' => $network->id,
             'tier' => $tier,
             'value_json' => $result->tiers,
-            'expires_at' => \Carbon\Carbon::createFromTimestamp($result->expiresAtEpoch),
+            'expires_at' => Carbon::createFromTimestamp($result->expiresAtEpoch),
         ]);
 
         return [

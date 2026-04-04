@@ -3,17 +3,18 @@
 namespace App\Providers;
 
 use App\Domain\ApiTokens\Services\ApiTokenIssuer;
-use App\Domain\Realtime\Services\RealtimeBroadcastService;
-use App\Domain\Webhooks\Services\OutboundWebhookSigner;
-use App\Domain\Webhooks\Services\WebhookDispatcher;
 use App\Domain\Chain\Adapters\BitcoinAdapter;
 use App\Domain\Chain\Adapters\EthereumAdapter;
 use App\Domain\Chain\Adapters\SolanaAdapter;
 use App\Domain\Chain\Adapters\TronAdapter;
 use App\Domain\Chain\ChainAdapterResolver;
 use App\Domain\Observability\Services\OperatorGate;
+use App\Domain\Realtime\Services\RealtimeBroadcastService;
+use App\Domain\Webhooks\Services\OutboundWebhookSigner;
+use App\Domain\Webhooks\Services\WebhookDispatcher;
 use App\Listeners\RegisterUserSessionOnLogin;
 use App\Listeners\RevokeUserSessionOnLogout;
+use App\Models\SanctumPersonalAccessToken;
 use App\Models\User;
 use App\Rbac\ComparingPermissionResolver;
 use Artixcore\ArtGate\Contracts\AuthorizationRepository;
@@ -41,7 +42,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        Sanctum::usePersonalAccessTokenModel(\App\Models\SanctumPersonalAccessToken::class);
+        Sanctum::usePersonalAccessTokenModel(SanctumPersonalAccessToken::class);
 
         $this->app->singleton(ApiTokenIssuer::class, function (Application $app): ApiTokenIssuer {
             return new ApiTokenIssuer(
