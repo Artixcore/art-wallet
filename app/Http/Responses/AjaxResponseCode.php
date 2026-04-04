@@ -13,6 +13,10 @@ enum AjaxResponseCode: string
     case ChainError = 'CHAIN_ERROR';
     case InvalidRequest = 'INVALID_REQUEST';
     case Unauthorized = 'UNAUTHORIZED';
+    /** Refresh token presented after rotation; family revoked server-side. */
+    case TokenReuseDetected = 'TOKEN_REUSE_DETECTED';
+    /** Access token expired; client should refresh or re-authenticate. */
+    case TokenExpired = 'TOKEN_EXPIRED';
     case Forbidden = 'FORBIDDEN';
     case NotFound = 'NOT_FOUND';
     case ServerError = 'SERVER_ERROR';

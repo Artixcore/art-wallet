@@ -14,13 +14,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 #[Fillable(['name', 'email', 'password', 'is_admin'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasArtGateRoles, HasFactory, Notifiable;
+    use HasApiTokens, HasArtGateRoles, HasFactory, Notifiable;
 
     public function isAdmin(): bool
     {
@@ -33,6 +34,14 @@ class User extends Authenticatable
     public function wallets(): HasMany
     {
         return $this->hasMany(Wallet::class);
+    }
+
+    /**
+     * @return HasMany<ApiDevice, $this>
+     */
+    public function apiDevices(): HasMany
+    {
+        return $this->hasMany(ApiDevice::class);
     }
 
     /**

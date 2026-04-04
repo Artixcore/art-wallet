@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Domain\ApiTokens\Services\ApiTokenIssuer;
+use App\Domain\Realtime\Services\RealtimeBroadcastService;
+use App\Domain\Webhooks\Services\OutboundWebhookSigner;
+use App\Domain\Webhooks\Services\WebhookDispatcher;
 use App\Domain\Chain\Adapters\BitcoinAdapter;
 use App\Domain\Chain\Adapters\EthereumAdapter;
 use App\Domain\Chain\Adapters\SolanaAdapter;
@@ -19,11 +23,15 @@ use Artixcore\ArtGate\Contracts\SuperUserGuard;
 use Artixcore\ArtGate\Resolvers\DatabasePermissionResolver;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Sanctum\Sanctum;
 use Psr\Log\LoggerInterface;
 
 class AppServiceProvider extends ServiceProvider
@@ -33,6 +41,19 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        Sanctum::usePersonalAccessTokenModel(\App\Models\SanctumPersonalAccessToken::class);
+
+        $this->app->singleton(ApiTokenIssuer::class, function (Application $app): ApiTokenIssuer {
+            return new ApiTokenIssuer(
+                (int) config('artwallet_api.access_token_ttl_minutes', 45),
+                (int) config('artwallet_api.refresh_token_ttl_days', 30),
+            );
+        });
+
+        $this->app->singleton(OutboundWebhookSigner::class);
+        $this->app->singleton(WebhookDispatcher::class);
+        $this->app->singleton(RealtimeBroadcastService::class);
+
         $this->app->singleton(ChainAdapterResolver::class, function ($app) {
             return new ChainAdapterResolver([
                 $app->make(EthereumAdapter::class),
@@ -55,8 +76,40 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(Login::class, RegisterUserSessionOnLogin::class);
         Event::listen(Logout::class, RevokeUserSessionOnLogout::class);
 
+        $this->registerApiRateLimiters();
         $this->registerOperatorGates();
         $this->registerRbacCompareMode();
+    }
+
+    private function registerApiRateLimiters(): void
+    {
+        RateLimiter::for('api', function (Request $request): Limit {
+            return Limit::perMinute(120)->by((string) ($request->user()?->getAuthIdentifier() ?? $request->ip()));
+        });
+
+        RateLimiter::for('api-auth', function (Request $request): Limit {
+            return Limit::perMinute(5)->by($request->ip());
+        });
+
+        RateLimiter::for('api-refresh', function (Request $request): Limit {
+            return Limit::perMinute(10)->by($request->ip());
+        });
+
+        RateLimiter::for('api-sync', function (Request $request): Limit {
+            return Limit::perMinute(60)->by((string) ($request->user()?->getAuthIdentifier() ?? $request->ip()));
+        });
+
+        RateLimiter::for('api-tx-intent', function (Request $request): Limit {
+            return Limit::perMinute(30)->by((string) ($request->user()?->getAuthIdentifier() ?? $request->ip()));
+        });
+
+        RateLimiter::for('api-broadcast', function (Request $request): Limit {
+            return Limit::perMinute(20)->by((string) ($request->user()?->getAuthIdentifier() ?? $request->ip()));
+        });
+
+        RateLimiter::for('webhook-inbound', function (Request $request): Limit {
+            return Limit::perMinute(60)->by($request->ip());
+        });
     }
 
     /**
