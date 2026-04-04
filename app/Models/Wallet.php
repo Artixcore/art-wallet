@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Wallet extends Model
 {
@@ -49,5 +50,21 @@ class Wallet extends Model
     public function transactionIntents(): HasMany
     {
         return $this->hasMany(TransactionIntent::class);
+    }
+
+    /**
+     * @return HasOne<WalletSetting, $this>
+     */
+    public function walletSetting(): HasOne
+    {
+        return $this->hasOne(WalletSetting::class);
+    }
+
+    /**
+     * @return HasOne<WalletTransactionPolicy, $this>
+     */
+    public function walletTransactionPolicy(): HasOne
+    {
+        return $this->hasOne(WalletTransactionPolicy::class);
     }
 }

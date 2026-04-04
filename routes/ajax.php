@@ -13,17 +13,32 @@ use App\Http\Controllers\Api\NotificationAjaxController;
 use App\Http\Controllers\Api\RecoveryKitAjaxController;
 use App\Http\Controllers\Api\SecurityEventsAjaxController;
 use App\Http\Controllers\Api\SessionSecurityAjaxController;
+use App\Http\Controllers\Api\SettingsAjaxController;
+use App\Http\Controllers\Api\SettingsAuditAjaxController;
 use App\Http\Controllers\Api\TransactionHistoryAjaxController;
 use App\Http\Controllers\Api\TransactionIntentAjaxController;
 use App\Http\Controllers\Api\TrustedDeviceAjaxController;
 use App\Http\Controllers\Api\WalletAddressAjaxController;
 use App\Http\Controllers\Api\WalletAjaxController;
 use App\Http\Controllers\Api\WalletListAjaxController;
+use App\Http\Controllers\Api\WalletSettingsAjaxController;
 use App\Http\Controllers\Api\WalletVaultAjaxController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'verified', 'throttle:120,1'])->prefix('ajax')->group(function () {
     Route::get('/health', [HealthAjaxController::class, 'show'])->name('ajax.health');
+});
+
+Route::middleware(['auth', 'verified', 'throttle:60,1'])->prefix('ajax/settings')->group(function () {
+    Route::get('/', [SettingsAjaxController::class, 'show'])->name('ajax.settings.show');
+    Route::put('/user', [SettingsAjaxController::class, 'updateUser'])->name('ajax.settings.user.update');
+    Route::put('/security-policy', [SettingsAjaxController::class, 'updateSecurityPolicy'])->name('ajax.settings.security-policy.update');
+    Route::put('/messaging-privacy', [SettingsAjaxController::class, 'updateMessagingPrivacy'])->name('ajax.settings.messaging-privacy.update');
+    Route::put('/risk-thresholds', [SettingsAjaxController::class, 'updateRiskThresholds'])->name('ajax.settings.risk-thresholds.update');
+    Route::get('/audit', [SettingsAuditAjaxController::class, 'index'])->name('ajax.settings.audit.index');
+    Route::post('/step-up', [SettingsAjaxController::class, 'stepUp'])
+        ->middleware('throttle:12,1')
+        ->name('ajax.settings.step-up');
 });
 
 Route::middleware(['auth', 'verified', 'throttle:60,1'])->prefix('ajax')->group(function () {
@@ -51,6 +66,15 @@ Route::middleware(['auth', 'verified', 'throttle:60,1'])->prefix('ajax')->group(
         ->whereNumber('wallet')
         ->name('ajax.wallets.vault.show');
     Route::get('/fee-estimates', [FeeEstimateAjaxController::class, 'show'])->name('ajax.fee-estimates.show');
+    Route::get('/wallets/{wallet}/settings-bundle', [WalletSettingsAjaxController::class, 'show'])
+        ->whereNumber('wallet')
+        ->name('ajax.wallets.settings-bundle.show');
+    Route::put('/wallets/{wallet}/settings-bundle', [WalletSettingsAjaxController::class, 'updateWallet'])
+        ->whereNumber('wallet')
+        ->name('ajax.wallets.settings-bundle.update');
+    Route::put('/wallets/{wallet}/transaction-policy', [WalletSettingsAjaxController::class, 'updateTransactionPolicy'])
+        ->whereNumber('wallet')
+        ->name('ajax.wallets.transaction-policy.update');
 });
 
 Route::middleware(['auth', 'verified', 'throttle:30,1'])->prefix('ajax')->group(function () {

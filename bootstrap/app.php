@@ -1,6 +1,7 @@
 <?php
 
 use App\Domain\Notifications\Enums\NotificationSeverity;
+use App\Domain\Settings\Exceptions\SettingsConflictException;
 use App\Http\Middleware\RecordSessionActivity;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Responses\AjaxEnvelope;
@@ -39,6 +40,18 @@ return Application::configure(basePath: dirname(__DIR__))
             return $request->expectsJson()
                 || $request->header('X-Requested-With') === 'XMLHttpRequest';
         };
+
+        $exceptions->render(function (SettingsConflictException $e, Request $request) use ($ajaxAware) {
+            if (! $ajaxAware($request)) {
+                return null;
+            }
+
+            return AjaxEnvelope::error(
+                AjaxResponseCode::Conflict,
+                $e->getMessage(),
+                NotificationSeverity::Warning,
+            )->toJsonResponse(409);
+        });
 
         $exceptions->render(function (ValidationException $e, Request $request) use ($ajaxAware) {
             if (! $ajaxAware($request)) {

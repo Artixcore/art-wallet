@@ -11,6 +11,7 @@ export default defineConfig({
                 'resources/js/security-center.js',
                 'resources/js/wallet-transactions.js',
                 'resources/js/notifications.js',
+                'resources/js/settings-manager.js',
             ],
             refresh: true,
         }),

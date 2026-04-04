@@ -23,6 +23,25 @@ return [
             'body' => 'Review your security settings if you did not perform this action.',
         ],
     ],
+    'settings' => [
+        'security_policy_relaxed' => [
+            'title' => 'Session policy changed',
+            'body' => 'Your session or notification policy was relaxed. If this was not you, secure your account immediately.',
+        ],
+        'transaction_policy_relaxed' => [
+            'title' => 'Transaction confirmation policy changed',
+            'body' => 'Confirmation rules for wallet :wallet_id were relaxed. Review that wallet if you did not make this change.',
+            'body_fallback' => 'Transaction confirmation rules were relaxed. Review your wallet settings if you did not make this change.',
+        ],
+        'messaging_privacy_weakened' => [
+            'title' => 'Messaging safety warnings disabled',
+            'body' => 'Some safety prompts were turned off. Phishing and risky attachments are easier to miss.',
+        ],
+        'risk_threshold_relaxed' => [
+            'title' => 'Risk alert threshold raised',
+            'body' => 'Large transaction alerts will trigger less often. Verify this matches your intent.',
+        ],
+    ],
     'fallback' => [
         'title' => 'Notice',
     ],

@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Web\CryptoPocController;
 use App\Http\Controllers\Web\NotificationsWebController;
 use App\Http\Controllers\Web\SecurityWebController;
+use App\Http\Controllers\Web\SettingsWebController;
 use App\Http\Controllers\Web\WalletTransactionsController;
 use Illuminate\Support\Facades\Route;
 
@@ -22,6 +23,10 @@ Route::get('/crypto/poc', [CryptoPocController::class, 'show'])
 Route::get('/security', [SecurityWebController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('security.index');
+
+Route::get('/settings', [SettingsWebController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('settings.index');
 
 Route::get('/wallet/transactions', [WalletTransactionsController::class, 'show'])
     ->middleware(['auth', 'verified'])

@@ -9,15 +9,10 @@ class WalletPolicy
 {
     public function view(User $user, Wallet $wallet): bool
     {
-        return (int) $user->id === (int) $wallet->user_id;
+        return (int) $wallet->user_id === (int) $user->id;
     }
 
-    public function manageAddresses(User $user, Wallet $wallet): bool
-    {
-        return $this->view($user, $wallet);
-    }
-
-    public function createTransactionIntent(User $user, Wallet $wallet): bool
+    public function update(User $user, Wallet $wallet): bool
     {
         return $this->view($user, $wallet);
     }

@@ -119,6 +119,53 @@ export async function apiGetJson(url, ajaxOptions = {}) {
  * @param {Record<string, unknown>} [ajaxOptions]
  * @returns {Promise<Record<string, unknown>>}
  */
+/**
+ * @param {string} url
+ * @param {unknown} [data]
+ * @param {Record<string, unknown>} [ajaxOptions]
+ * @returns {Promise<Record<string, unknown>>}
+ */
+export async function apiPutJson(url, data, ajaxOptions = {}) {
+    return new Promise((resolve, reject) => {
+        const headers = { ...ajaxOptions.headers };
+        $.ajax({
+            url,
+            method: 'PUT',
+            contentType: 'application/json',
+            data: data !== undefined ? JSON.stringify(data) : undefined,
+            dataType: 'json',
+            headers,
+            ...ajaxOptions,
+        })
+            .done((body) => {
+                const parsed = /** @type {unknown} */ (body);
+                const env = normalizeResponse(parsed);
+                if (env) {
+                    if (!env.success) {
+                        applyEnvelope(env);
+                        reject(new AjaxEnvelopeError(env));
+
+                        return;
+                    }
+                    applyEnvelope(env);
+
+                    resolve(env);
+                } else {
+                    resolve(isRecord(parsed) ? /** @type {Record<string, unknown>} */ (parsed) : {});
+                }
+            })
+            .fail((xhr) => {
+                handleFail(xhr, reject);
+            });
+    });
+}
+
+/**
+ * @param {string} url
+ * @param {unknown} [data]
+ * @param {Record<string, unknown>} [ajaxOptions]
+ * @returns {Promise<Record<string, unknown>>}
+ */
 export async function apiPostJson(url, data, ajaxOptions = {}) {
     return new Promise((resolve, reject) => {
         const headers = { ...ajaxOptions.headers };

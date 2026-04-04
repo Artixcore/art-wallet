@@ -17,4 +17,7 @@ enum AjaxResponseCode: string
     case NotFound = 'NOT_FOUND';
     case ServerError = 'SERVER_ERROR';
     case NetworkError = 'NETWORK_ERROR';
+    case Conflict = 'CONFLICT';
+    case StepUpRequired = 'STEP_UP_REQUIRED';
+    case PolicyRejected = 'POLICY_REJECTED';
 }

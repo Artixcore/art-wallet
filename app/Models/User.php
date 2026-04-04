@@ -76,6 +76,38 @@ class User extends Authenticatable
     }
 
     /**
+     * @return HasOne<UserSetting, $this>
+     */
+    public function userSetting(): HasOne
+    {
+        return $this->hasOne(UserSetting::class);
+    }
+
+    /**
+     * @return HasOne<UserSecurityPolicy, $this>
+     */
+    public function userSecurityPolicy(): HasOne
+    {
+        return $this->hasOne(UserSecurityPolicy::class);
+    }
+
+    /**
+     * @return HasOne<MessagingPrivacySetting, $this>
+     */
+    public function messagingPrivacySetting(): HasOne
+    {
+        return $this->hasOne(MessagingPrivacySetting::class);
+    }
+
+    /**
+     * @return HasOne<RiskThresholdSetting, $this>
+     */
+    public function riskThresholdSetting(): HasOne
+    {
+        return $this->hasOne(RiskThresholdSetting::class);
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
