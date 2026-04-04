@@ -4,6 +4,7 @@ use App\Domain\Notifications\Enums\NotificationSeverity;
 use App\Domain\Settings\Exceptions\SettingsConflictException;
 use App\Http\Middleware\RecordSessionActivity;
 use App\Http\Middleware\SecurityHeaders;
+use App\Http\Middleware\ValidateOpsMonitorToken;
 use App\Http\Responses\AjaxEnvelope;
 use App\Http\Responses\AjaxResponseCode;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -30,6 +31,9 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->alias([
+            'ops.monitor' => ValidateOpsMonitorToken::class,
+        ]);
         $middleware->appendToGroup('web', [
             SecurityHeaders::class,
             RecordSessionActivity::class,

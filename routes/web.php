@@ -5,6 +5,7 @@ use App\Http\Controllers\Web\CryptoPocController;
 use App\Http\Controllers\Web\MessagingWebController;
 use App\Http\Controllers\Web\NotificationsWebController;
 use App\Http\Controllers\Web\OperatorDashboardController;
+use App\Http\Controllers\Web\OpsMonitoringHealthController;
 use App\Http\Controllers\Web\SecurityWebController;
 use App\Http\Controllers\Web\SettingsWebController;
 use App\Http\Controllers\Web\WalletTransactionsController;
@@ -13,6 +14,10 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/ops/monitor/health', [OpsMonitoringHealthController::class, 'show'])
+    ->middleware(['ops.monitor', 'throttle:120,1'])
+    ->name('ops.monitor.health');
 
 Route::get('/dashboard', function () {
     return view('dashboard');

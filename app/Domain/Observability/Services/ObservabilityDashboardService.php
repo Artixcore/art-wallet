@@ -125,6 +125,65 @@ final class ObservabilityDashboardService
         ];
     }
 
+    /**
+     * Summary for external monitors: same staleness/TTL rules as {@see buildSummary()},
+     * without detail_json (reduces accidental leakage of operational metadata).
+     *
+     * @return array<string, mixed>
+     */
+    public function buildMonitoringSummary(): array
+    {
+        $full = $this->buildSummary();
+
+        $checks = [];
+        foreach ($full['checks'] as $row) {
+            $checks[] = [
+                'subsystem' => $row['subsystem'],
+                'check_key' => $row['check_key'],
+                'status' => $row['status'],
+                'raw_status' => $row['raw_status'],
+                'observed_at' => $row['observed_at'],
+                'latency_ms' => $row['latency_ms'],
+                'error_code' => $row['error_code'],
+                'probe_version' => $row['probe_version'],
+                'ttl_seconds' => $row['ttl_seconds'],
+            ];
+        }
+
+        $rpc = [];
+        foreach ($full['rpc'] as $row) {
+            $rpc[] = [
+                'chain' => $row['chain'],
+                'status' => $row['status'],
+                'raw_status' => $row['raw_status'],
+                'observed_at' => $row['observed_at'],
+                'latency_ms' => $row['latency_ms'],
+                'block_height' => $row['block_height'],
+                'error_code' => $row['error_code'],
+            ];
+        }
+
+        return [
+            'overall' => $full['overall'],
+            'overall_state' => $full['overall_state'],
+            'stale' => $full['stale'],
+            'stale_subsystems' => $full['stale_subsystems'],
+            'partial' => $full['partial'],
+            'probe_errors' => $full['probe_errors'],
+            'incidents_open' => $full['incidents_open'],
+            'server_time' => $full['server_time'],
+            'checks' => $checks,
+            'rpc' => $rpc,
+            'ttl_config_seconds' => [
+                'default' => (int) config('observability.ttl_seconds.default', 120),
+                'queue' => (int) config('observability.ttl_seconds.queue', 180),
+                'database' => (int) config('observability.ttl_seconds.database', 60),
+                'rpc' => (int) config('observability.ttl_seconds.rpc', 300),
+                'notifications' => (int) config('observability.ttl_seconds.notifications', 300),
+            ],
+        ];
+    }
+
     private function ttlFor(string $subsystem): int
     {
         return match (true) {
