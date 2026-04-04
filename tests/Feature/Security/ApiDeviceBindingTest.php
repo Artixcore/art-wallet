@@ -16,7 +16,7 @@ final class ApiDeviceBindingTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_missing_device_header_returns_401_envelope(): void
+    public function test_missing_device_header_returns_401(): void
     {
         $user = User::factory()->create();
         $device = ApiDevice::query()->create([

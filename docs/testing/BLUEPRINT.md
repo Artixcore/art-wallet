@@ -87,8 +87,9 @@ Realtime: channel authorization in [`routes/channels.php`](../../routes/channels
 
 ## 8. Frontend UX Safety
 
-- CI: forbid `alert(`, `confirm(`, `prompt(` in [`resources/js`](../../resources/js) (see `scripts/ops/no-browser-dialogs.sh`).
+- CI: forbid `alert(`, `confirm(`, `prompt(` in [`resources/js`](../../resources/js) (see [`scripts/ops/no-browser-dialogs.sh`](../../scripts/ops/no-browser-dialogs.sh)).
 - E2E: assert visible states match envelope (`success`, `code`, `meta.partial` / `stale`).
+- **CSRF vs PHPUnit**: Laravel `PreventRequestForgery` skips CSRF when `runningUnitTests()` is true, so **Feature tests** do not prove CSRF. Use browser E2E ([`e2e/`](../../e2e/)) against `php artisan serve` for CSRF regressions on state-changing POSTs.
 
 ---
 
