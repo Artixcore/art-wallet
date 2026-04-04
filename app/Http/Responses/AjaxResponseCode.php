@@ -48,4 +48,19 @@ enum AjaxResponseCode: string
     case MessagingDiscoveryDenied = 'MESSAGING_DISCOVERY_DENIED';
     /** DM requires approval before a new thread can be opened. */
     case MessagingDmRequiresApproval = 'MESSAGING_DM_REQUIRES_APPROVAL';
+
+    /** Agent / LLM provider timed out. */
+    case AgentProviderTimeout = 'AGENT_PROVIDER_TIMEOUT';
+    /** Agent provider rejected credentials or request. */
+    case AgentProviderUnauthorized = 'AGENT_PROVIDER_UNAUTHORIZED';
+    /** Agent run exceeded token/cost/time budget. */
+    case AgentBudgetExceeded = 'AGENT_BUDGET_EXCEEDED';
+    /** Workflow or tool step requires explicit user approval. */
+    case AgentApprovalRequired = 'AGENT_APPROVAL_REQUIRED';
+    /** Agent run failed after retries or non-retryable error. */
+    case AgentRunFailed = 'AGENT_RUN_FAILED';
+    /** No healthy provider available for routing. */
+    case AgentProviderUnavailable = 'AGENT_PROVIDER_UNAVAILABLE';
+    /** Provider comparison could not complete within budget or constraints. */
+    case AgentComparisonIncomplete = 'AGENT_COMPARISON_INCOMPLETE';
 }

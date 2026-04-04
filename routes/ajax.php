@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\AgentCredentialsAjaxController;
+use App\Http\Controllers\Api\AgentsAjaxController;
 use App\Http\Controllers\Api\BackupStateAjaxController;
 use App\Http\Controllers\Api\BroadcastAjaxController;
 use App\Http\Controllers\Api\ConversationAjaxController;
@@ -64,6 +66,34 @@ Route::middleware(['auth', 'verified', 'throttle:60,1'])->prefix('ajax')->group(
         ->name('ajax.notifications.acknowledge');
     Route::get('/notifications/preferences', [NotificationAjaxController::class, 'preferences'])->name('ajax.notifications.preferences.show');
     Route::put('/notifications/preferences', [NotificationAjaxController::class, 'updatePreferences'])->name('ajax.notifications.preferences.update');
+});
+
+Route::middleware(['auth', 'verified', 'throttle:60,1'])->prefix('ajax/agents')->group(function () {
+    Route::get('/dashboard', [AgentsAjaxController::class, 'dashboard'])->name('ajax.agents.dashboard');
+    Route::get('/credentials', [AgentCredentialsAjaxController::class, 'index'])->name('ajax.agents.credentials.index');
+    Route::post('/credentials', [AgentCredentialsAjaxController::class, 'store'])->name('ajax.agents.credentials.store');
+    Route::delete('/credentials/{agent_api_credential}', [AgentCredentialsAjaxController::class, 'destroy'])->name('ajax.agents.credentials.destroy');
+    Route::post('/credentials/{agent_api_credential}/test', [AgentCredentialsAjaxController::class, 'test'])
+        ->middleware('throttle:12,1')
+        ->name('ajax.agents.credentials.test');
+    Route::post('/workflows', [AgentsAjaxController::class, 'storeWorkflow'])->name('ajax.agents.workflows.store');
+    Route::post('/workflows/{workflow}/run', [AgentsAjaxController::class, 'runWorkflow'])
+        ->middleware('throttle:20,1')
+        ->name('ajax.agents.workflows.run');
+    Route::get('/runs/{agent_run}', [AgentsAjaxController::class, 'runStatus'])->name('ajax.agents.runs.show');
+    Route::get('/', [AgentsAjaxController::class, 'index'])->name('ajax.agents.index');
+    Route::post('/', [AgentsAjaxController::class, 'store'])->name('ajax.agents.store');
+    Route::get('/{agent}', [AgentsAjaxController::class, 'show'])->name('ajax.agents.show');
+    Route::put('/{agent}', [AgentsAjaxController::class, 'update'])->name('ajax.agents.update');
+    Route::put('/{agent}/prompt', [AgentsAjaxController::class, 'updatePrompt'])->name('ajax.agents.prompt.update');
+    Route::post('/{agent}/run', [AgentsAjaxController::class, 'run'])
+        ->middleware('throttle:30,1')
+        ->name('ajax.agents.run');
+    Route::put('/{agent}/tools', [AgentsAjaxController::class, 'updateTools'])->name('ajax.agents.tools.update');
+    Route::put('/{agent}/bindings', [AgentsAjaxController::class, 'updateBindings'])->name('ajax.agents.bindings.update');
+    Route::post('/{agent}/providers/compare', [AgentsAjaxController::class, 'compare'])
+        ->middleware('throttle:12,1')
+        ->name('ajax.agents.providers.compare');
 });
 
 Route::middleware(['auth', 'verified', 'throttle:12,1'])->prefix('ajax')->group(function () {

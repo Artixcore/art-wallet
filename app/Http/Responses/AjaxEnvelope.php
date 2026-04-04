@@ -19,6 +19,11 @@ use Symfony\Component\HttpFoundation\Response;
  * - `subsystem_status` (array<string, string>): map of subsystem id to rollup status (e.g. healthy, stale, unknown).
  * - `actions` (array): e.g. `requires_step_up`, `confirm_token` for remediation flows.
  * - `server_time` (string ISO8601): server snapshot time for the response.
+ *
+ * **Agent platform `meta` keys** (optional):
+ * - `run_status`, `workflow_status`, `comparison_status`, `provider_status` (maps)
+ * - `retryable` (bool), `requires_confirmation` (bool)
+ * - `logs_summary` (list of event ids / categories only — no secrets)
  */
 final class AjaxEnvelope
 {

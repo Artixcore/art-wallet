@@ -69,6 +69,30 @@ class User extends Authenticatable
     }
 
     /**
+     * @return HasMany<Agent, $this>
+     */
+    public function agents(): HasMany
+    {
+        return $this->hasMany(Agent::class);
+    }
+
+    /**
+     * @return HasMany<AgentRun, $this>
+     */
+    public function agentRuns(): HasMany
+    {
+        return $this->hasMany(AgentRun::class);
+    }
+
+    /**
+     * @return HasMany<AgentApiCredential, $this>
+     */
+    public function agentApiCredentials(): HasMany
+    {
+        return $this->hasMany(AgentApiCredential::class);
+    }
+
+    /**
      * @return HasMany<InAppNotification, $this>
      */
     public function inAppNotifications(): HasMany
