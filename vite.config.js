@@ -14,6 +14,8 @@ export default defineConfig({
                 'resources/js/settings-manager.js',
                 'resources/js/operator-dashboard.js',
                 'resources/js/secure-messaging.js',
+                'resources/js/agents-dashboard.js',
+                'resources/js/agents-editor.js',
             ],
             refresh: true,
         }),

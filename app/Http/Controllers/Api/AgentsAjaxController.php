@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Domain\Agents\Services\AgentManagementService;
 use App\Domain\Agents\Services\AgentRunRecorder;
+use App\Domain\Agents\Services\AgentToolExecutionService;
 use App\Domain\Agents\Services\ProviderComparisonService;
 use App\Domain\Agents\Services\ProviderRouterService;
 use App\Domain\Tools\ToolRegistry;
@@ -11,6 +12,7 @@ use App\Domain\Workflows\Services\WorkflowDefinitionValidator;
 use App\Domain\Workflows\Services\WorkflowRunService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Ajax\Agents\CompareProvidersRequest;
+use App\Http\Requests\Ajax\Agents\ExecuteAgentToolRequest;
 use App\Http\Requests\Ajax\Agents\RunAgentRequest;
 use App\Http\Requests\Ajax\Agents\StoreAgentRequest;
 use App\Http\Requests\Ajax\Agents\StoreWorkflowRequest;
@@ -170,6 +172,31 @@ class AgentsAjaxController extends Controller
             meta: [
                 'run_status' => ['id' => $run->id, 'status' => $run->status],
             ],
+        )->toJsonResponse();
+    }
+
+    public function executeTool(ExecuteAgentToolRequest $request, Agent $agent, AgentToolExecutionService $toolExecution): JsonResponse
+    {
+        $this->authorize('run', $agent);
+
+        $v = $request->validated();
+        try {
+            $result = $toolExecution->executeEnabledTool(
+                $request->user(),
+                $agent,
+                $v['tool_key'],
+                $v['args'] ?? [],
+            );
+        } catch (\InvalidArgumentException $e) {
+            return AjaxEnvelope::error(
+                AjaxResponseCode::InvalidRequest,
+                $e->getMessage(),
+            )->toJsonResponse(422);
+        }
+
+        return AjaxEnvelope::ok(
+            message: __('Tool executed.'),
+            data: ['result' => $result],
         )->toJsonResponse();
     }
 

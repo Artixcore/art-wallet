@@ -89,6 +89,9 @@ Route::middleware(['auth', 'verified', 'throttle:60,1'])->prefix('ajax/agents')-
     Route::post('/{agent}/run', [AgentsAjaxController::class, 'run'])
         ->middleware('throttle:30,1')
         ->name('ajax.agents.run');
+    Route::post('/{agent}/tools/execute', [AgentsAjaxController::class, 'executeTool'])
+        ->middleware('throttle:30,1')
+        ->name('ajax.agents.tools.execute');
     Route::put('/{agent}/tools', [AgentsAjaxController::class, 'updateTools'])->name('ajax.agents.tools.update');
     Route::put('/{agent}/bindings', [AgentsAjaxController::class, 'updateBindings'])->name('ajax.agents.bindings.update');
     Route::post('/{agent}/providers/compare', [AgentsAjaxController::class, 'compare'])
