@@ -18,7 +18,6 @@
             data-ajax-dashboard-url="{{ route('ajax.agents.dashboard') }}"
             data-ajax-agents-url="{{ route('ajax.agents.index') }}"
             data-ajax-credentials-url="{{ route('ajax.agents.credentials.index') }}"
-            data-ajax-providers-compare-url="{{ route('ajax.agents.providers.compare') }}"
         >
             <div class="flex flex-wrap items-center gap-3">
                 <button type="button" id="agents-btn-create" class="inline-flex items-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900">
