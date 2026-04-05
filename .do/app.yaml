@@ -1,0 +1,198 @@
+# DigitalOcean App Platform spec (template).
+# 1) Replace PLACEHOLDER_ORG/art-wallet with your GitHub repo on every github: block (or attach repo in UI).
+# 2) Set encrypted build secret ARTGATE_GIT_URL (and optional ARTGATE_GIT_REF) for each component that builds this Dockerfile.
+# 3) Add encrypted runtime secret APP_KEY for web, queue, and migrate (same value): php artisan key:generate --show
+# 4) Set APP_URL to your real HTTPS URL (Components → Environment Variables).
+# 5) Remove workers: or jobs: blocks if you only want the web service first.
+#
+# Reference: https://docs.digitalocean.com/products/app-platform/reference/app-specification/
+
+name: art-wallet
+region: nyc
+
+ingress:
+  rules:
+    - component:
+        name: web
+      match:
+        path:
+          prefix: /
+
+databases:
+  - name: db
+    engine: MYSQL
+    production: true
+    version: "8"
+
+services:
+  - name: web
+    dockerfile_path: Dockerfile
+    source_dir: /
+    github:
+      repo: PLACEHOLDER_ORG/art-wallet
+      branch: main
+      deploy_on_push: true
+    build_environment_vars:
+      - key: ARTGATE_GIT_URL
+        scope: BUILD_TIME
+        type: SECRET
+        value: REPLACE_ME
+      - key: ARTGATE_GIT_REF
+        scope: BUILD_TIME
+        value: main
+    http_port: 8080
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    run_command: /usr/local/bin/entrypoint-web.sh
+    envs:
+      - key: APP_ENV
+        scope: RUN_TIME
+        value: production
+      - key: APP_DEBUG
+        scope: RUN_TIME
+        value: "false"
+      - key: LOG_CHANNEL
+        scope: RUN_TIME
+        value: stderr
+      - key: VITE_USE_HOT
+        scope: RUN_TIME
+        value: "false"
+      - key: DB_CONNECTION
+        scope: RUN_TIME
+        value: mysql
+      - key: DB_HOST
+        scope: RUN_TIME
+        value: ${db.HOSTNAME}
+      - key: DB_PORT
+        scope: RUN_TIME
+        value: ${db.PORT}
+      - key: DB_DATABASE
+        scope: RUN_TIME
+        value: ${db.DATABASE}
+      - key: DB_USERNAME
+        scope: RUN_TIME
+        value: ${db.USERNAME}
+      - key: DB_PASSWORD
+        scope: RUN_TIME
+        value: ${db.PASSWORD}
+      - key: APP_URL
+        scope: RUN_TIME
+        value: https://YOUR-APP-URL.ondigitalocean.app
+      - key: SESSION_DRIVER
+        scope: RUN_TIME
+        value: database
+      - key: CACHE_STORE
+        scope: RUN_TIME
+        value: database
+      - key: QUEUE_CONNECTION
+        scope: RUN_TIME
+        value: database
+      - key: ARTGATE_RUN_PACKAGE_MIGRATIONS
+        scope: RUN_TIME
+        value: "true"
+
+workers:
+  - name: queue
+    dockerfile_path: Dockerfile
+    source_dir: /
+    github:
+      repo: PLACEHOLDER_ORG/art-wallet
+      branch: main
+      deploy_on_push: true
+    build_environment_vars:
+      - key: ARTGATE_GIT_URL
+        scope: BUILD_TIME
+        type: SECRET
+        value: REPLACE_ME
+      - key: ARTGATE_GIT_REF
+        scope: BUILD_TIME
+        value: main
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    run_command: /usr/local/bin/entrypoint-worker.sh
+    envs:
+      - key: APP_ENV
+        scope: RUN_TIME
+        value: production
+      - key: APP_DEBUG
+        scope: RUN_TIME
+        value: "false"
+      - key: LOG_CHANNEL
+        scope: RUN_TIME
+        value: stderr
+      - key: DB_CONNECTION
+        scope: RUN_TIME
+        value: mysql
+      - key: DB_HOST
+        scope: RUN_TIME
+        value: ${db.HOSTNAME}
+      - key: DB_PORT
+        scope: RUN_TIME
+        value: ${db.PORT}
+      - key: DB_DATABASE
+        scope: RUN_TIME
+        value: ${db.DATABASE}
+      - key: DB_USERNAME
+        scope: RUN_TIME
+        value: ${db.USERNAME}
+      - key: DB_PASSWORD
+        scope: RUN_TIME
+        value: ${db.PASSWORD}
+      - key: SESSION_DRIVER
+        scope: RUN_TIME
+        value: database
+      - key: CACHE_STORE
+        scope: RUN_TIME
+        value: database
+      - key: QUEUE_CONNECTION
+        scope: RUN_TIME
+        value: database
+      - key: ARTGATE_RUN_PACKAGE_MIGRATIONS
+        scope: RUN_TIME
+        value: "true"
+
+jobs:
+  - name: migrate
+    kind: PRE_DEPLOY
+    dockerfile_path: Dockerfile
+    source_dir: /
+    github:
+      repo: PLACEHOLDER_ORG/art-wallet
+      branch: main
+      deploy_on_push: true
+    build_environment_vars:
+      - key: ARTGATE_GIT_URL
+        scope: BUILD_TIME
+        type: SECRET
+        value: REPLACE_ME
+      - key: ARTGATE_GIT_REF
+        scope: BUILD_TIME
+        value: main
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    run_command: php artisan migrate --force --no-interaction
+    envs:
+      - key: APP_ENV
+        scope: RUN_TIME
+        value: production
+      - key: DB_CONNECTION
+        scope: RUN_TIME
+        value: mysql
+      - key: DB_HOST
+        scope: RUN_TIME
+        value: ${db.HOSTNAME}
+      - key: DB_PORT
+        scope: RUN_TIME
+        value: ${db.PORT}
+      - key: DB_DATABASE
+        scope: RUN_TIME
+        value: ${db.DATABASE}
+      - key: DB_USERNAME
+        scope: RUN_TIME
+        value: ${db.USERNAME}
+      - key: DB_PASSWORD
+        scope: RUN_TIME
+        value: ${db.PASSWORD}
+      - key: ARTGATE_RUN_PACKAGE_MIGRATIONS
+        scope: RUN_TIME
+        value: "true"
