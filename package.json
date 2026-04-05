@@ -8,6 +8,7 @@
         "test:e2e": "playwright test"
     },
     "devDependencies": {
+        "@playwright/test": "^1.50.0",
         "@tailwindcss/forms": "^0.5.2",
         "@tailwindcss/vite": "^4.0.0",
         "alpinejs": "^3.4.2",
@@ -17,8 +18,7 @@
         "laravel-vite-plugin": "^3.0.0",
         "postcss": "^8.4.31",
         "tailwindcss": "^3.1.0",
-        "vite": "^8.0.0",
-        "@playwright/test": "^1.50.0"
+        "vite": "^8.0.0"
     },
     "dependencies": {
         "@bitcoinerlab/secp256k1": "^1.2.0",
@@ -31,6 +31,7 @@
         "bitcoinjs-lib": "^7.0.1",
         "bs58": "^6.0.0",
         "bs58check": "^4.0.0",
+        "buffer": "^6.0.3",
         "ecpair": "^3.0.1",
         "ed25519-hd-key": "^1.3.0",
         "ethers": "^6.16.0",
