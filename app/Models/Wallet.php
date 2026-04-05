@@ -16,6 +16,7 @@ class Wallet extends Model
         'vault_version',
         'kdf_params',
         'wallet_vault_ciphertext',
+        'is_active',
     ];
 
     /**
@@ -25,6 +26,7 @@ class Wallet extends Model
     {
         return [
             'kdf_params' => 'array',
+            'is_active' => 'boolean',
         ];
     }
 

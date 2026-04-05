@@ -8,6 +8,10 @@ use Symfony\Component\HttpFoundation\Response;
 
 class SecurityHeaders
 {
+    /**
+     * CSP is global; onboarding relies on same-origin scripts (Vite) and WebCrypto.
+     * Tighten per-route nonces in a future pass if you introduce third-party script tags.
+     */
     public function handle(Request $request, Closure $next): Response
     {
         $response = $next($request);

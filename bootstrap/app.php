@@ -3,6 +3,7 @@
 use App\Domain\Notifications\Enums\NotificationSeverity;
 use App\Domain\Settings\Exceptions\SettingsConflictException;
 use App\Http\Middleware\EnsureApiDeviceBinding;
+use App\Http\Middleware\EnsureOnboardingComplete;
 use App\Http\Middleware\RecordSessionActivity;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\ValidateOpsMonitorToken;
@@ -37,6 +38,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'ops.monitor' => ValidateOpsMonitorToken::class,
             'api.device' => EnsureApiDeviceBinding::class,
+            'onboarding.complete' => EnsureOnboardingComplete::class,
         ]);
         $middleware->appendToGroup('web', [
             SecurityHeaders::class,

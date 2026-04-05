@@ -63,4 +63,13 @@ enum AjaxResponseCode: string
     case AgentProviderUnavailable = 'AGENT_PROVIDER_UNAVAILABLE';
     /** Provider comparison could not complete within budget or constraints. */
     case AgentComparisonIncomplete = 'AGENT_COMPARISON_INCOMPLETE';
+
+    /** Authenticated user must finish wallet onboarding before this resource. */
+    case OnboardingIncomplete = 'ONBOARDING_INCOMPLETE';
+    /** Onboarding step token invalid, expired, or out of order. */
+    case OnboardingStateInvalid = 'ONBOARDING_STATE_INVALID';
+    /** Vault bootstrap or ciphertext validation failed. */
+    case WalletBootstrapFailed = 'WALLET_BOOTSTRAP_FAILED';
+    /** Recovery phrase confirmation did not match verifier. */
+    case PassphraseConfirmationFailed = 'PASSPHRASE_CONFIRMATION_FAILED';
 }

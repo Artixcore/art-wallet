@@ -19,6 +19,11 @@ class WalletPolicy
 
     public function createTransactionIntent(User $user, Wallet $wallet): bool
     {
-        return $this->view($user, $wallet);
+        return $this->view($user, $wallet) && $wallet->is_active;
+    }
+
+    public function manageAddresses(User $user, Wallet $wallet): bool
+    {
+        return $this->view($user, $wallet) && $wallet->is_active;
     }
 }

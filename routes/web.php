@@ -54,45 +54,45 @@ Route::bind('agent_run', function (string $value): AgentRun {
 
 Route::get('/dashboard', function () {
     return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+})->middleware(['auth', 'verified', 'onboarding.complete'])->name('dashboard');
 
 Route::get('/agents', [AgentsWebController::class, 'index'])
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'onboarding.complete'])
     ->name('agents.index');
 
 Route::get('/agents/{agent}/edit', [AgentsWebController::class, 'edit'])
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'onboarding.complete'])
     ->name('agents.edit');
 
 Route::get('/crypto/poc', [CryptoPocController::class, 'show'])
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'onboarding.complete'])
     ->name('crypto.poc');
 
 Route::get('/security', [SecurityWebController::class, 'index'])
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'onboarding.complete'])
     ->name('security.index');
 
 Route::get('/settings', [SettingsWebController::class, 'index'])
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'onboarding.complete'])
     ->name('settings.index');
 
 Route::get('/wallet/transactions', [WalletTransactionsController::class, 'show'])
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'onboarding.complete'])
     ->name('wallet.transactions');
 
 Route::get('/notifications', [NotificationsWebController::class, 'index'])
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'onboarding.complete'])
     ->name('notifications.index');
 
 Route::get('/messaging', [MessagingWebController::class, 'index'])
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'onboarding.complete'])
     ->name('messaging.index');
 
 Route::get('/operator', [OperatorDashboardController::class, 'index'])
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'onboarding.complete'])
     ->name('operator.dashboard');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'verified', 'onboarding.complete'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

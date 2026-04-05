@@ -16,6 +16,7 @@ export default defineConfig({
                 'resources/js/secure-messaging.js',
                 'resources/js/agents-dashboard.js',
                 'resources/js/agents-editor.js',
+                'resources/js/onboarding.js',
             ],
             refresh: true,
         }),

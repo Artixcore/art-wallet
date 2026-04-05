@@ -16,7 +16,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['name', 'email', 'password', 'is_admin'])]
+#[Fillable(['name', 'email', 'username', 'password', 'is_admin', 'onboarding_status', 'onboarding_completed_at'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -151,6 +151,28 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_admin' => 'boolean',
+            'onboarding_completed_at' => 'datetime',
         ];
+    }
+
+    public function hasCompletedOnboarding(): bool
+    {
+        return $this->onboarding_completed_at !== null;
+    }
+
+    /**
+     * @return HasOne<OnboardingSession, $this>
+     */
+    public function onboardingSession(): HasOne
+    {
+        return $this->hasOne(OnboardingSession::class);
+    }
+
+    /**
+     * @return HasOne<OnboardingPassphraseVerifier, $this>
+     */
+    public function onboardingPassphraseVerifier(): HasOne
+    {
+        return $this->hasOne(OnboardingPassphraseVerifier::class);
     }
 }
