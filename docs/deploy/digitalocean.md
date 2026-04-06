@@ -25,7 +25,7 @@ Point `artixcore/artgate` at a Git or Packagist source and remove the `path` rep
 1. **GitHub (or GitLab)**: push this repository; replace `PLACEHOLDER_ORG/art-wallet` in `.do/app.yaml` (three places) or connect the repo in the App Platform UI.
 2. **Managed MySQL**: the template adds a `db` cluster; Laravel receives `DB_*` via `${db.*}` references.
 3. **Build secret `ARTGATE_GIT_URL`**: set for **web**, **queue**, and **migrate** components (each build may require it unless you deduplicate images in DO).
-4. **Runtime secret `APP_KEY`**: generate locally with `php artisan key:generate --show` and add the same value as an **encrypted** variable on **web**, **queue**, and **migrate** jobs (required for `config:cache`, queues, and some artisan commands).
+4. **Runtime secret `APP_KEY`**: generate locally with `php artisan key:generate --show` and add the same value as an **encrypted** variable on **web**, **queue**, and the **migrate** PRE_DEPLOY job. Laravel will refuse to boot without it (`config:cache`, `migrate`, queues).
 5. **`APP_URL`**: set to your live HTTPS URL (e.g. `https://your-app.ondigitalocean.app`).
 6. **Trust / Sanctum**: if you use custom domains, set `SANCTUM_STATEFUL_DOMAINS` and session cookie domain as needed.
 

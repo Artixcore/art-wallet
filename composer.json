@@ -45,6 +45,11 @@
         }
     },
     "scripts": {
+        "artgate:ensure": "bash scripts/ensure-artgate.sh",
+        "install-with-artgate": [
+            "@artgate:ensure",
+            "@composer install"
+        ],
         "setup": [
             "composer install",
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
