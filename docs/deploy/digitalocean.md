@@ -4,17 +4,17 @@ This app ships a multi-stage [Dockerfile](../../Dockerfile), [.dockerignore](../
 
 ## artixcore / artgate dependency
 
-Composer expects `artixcore/artgate` at **`../artgate`** relative to the app root. Inside the Docker image that path is **`/var/www/artgate`**.
+Composer expects `artixcore/artgate` at **`packages/artgate`** relative to the app root. Inside the Docker image that path is **`/var/www/html/packages/artgate`**.
 
 **Option A — build-time Git clone (default in Dockerfile)**  
 
-Set a **build-time** secret `ARTGATE_GIT_URL` to an HTTPS Git URL (and optionally `ARTGATE_GIT_REF` for branch/tag). The Dockerfile clones it to `/var/www/artgate` before `composer install`.
+Set a **build-time** secret `ARTGATE_GIT_URL` to an HTTPS Git URL (and optionally `ARTGATE_GIT_REF` for branch/tag). The Dockerfile copies the app, then clones artgate into `packages/artgate` before `composer install`.
 
 - Private repo: use a read-only token in the URL or follow DigitalOcean’s docs for build-time access to private Git dependencies.
 
 **Option B — monorepo context**  
 
-If both `art-wallet` and `artgate` live in one checkout, build from the parent directory with a custom Dockerfile that copies both trees into `/var/www/html` and `/var/www/artgate`, or adjust `COPY` paths to match your layout.
+If both `art-wallet` and `artgate` live in one checkout, include `packages/artgate` in the build context (or adjust `COPY` paths) so `packages/artgate/composer.json` exists before `composer install`; you can omit `ARTGATE_GIT_URL` when that tree is already present.
 
 **Option C — Composer VCS**  
 

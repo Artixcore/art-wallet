@@ -2,7 +2,7 @@
 #
 # ArtWallet production image (Laravel 13 / PHP 8.3).
 #
-# artixcore/artgate is a Composer *path* repo (../artgate). In the image, that path is /var/www/artgate.
+# artixcore/artgate is a Composer *path* repo (packages/artgate). In the image, that path is /var/www/html/packages/artgate.
 #
 # Option 1 — single Git repo on App Platform (recommended):
 #   Build args (set in DO → Settings → art-wallet → Build-time environment variables):
@@ -45,18 +45,17 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 ARG ARTGATE_GIT_URL=""
 ARG ARTGATE_GIT_REF="main"
 
-RUN mkdir -p /var/www/html /var/www/artgate
-
-# Satisfy Composer path repo: art-wallet at /var/www/html, artgate at /var/www/artgate (../artgate).
-RUN if [ -n "$ARTGATE_GIT_URL" ]; then \
-        git clone --depth 1 --branch "$ARTGATE_GIT_REF" "$ARTGATE_GIT_URL" /var/www/artgate; \
-    fi
-
 WORKDIR /var/www/html
 COPY . .
 
-RUN if [ ! -f /var/www/artgate/composer.json ]; then \
-        echo "Build failed: artgate not found at /var/www/artgate."; \
+# Clone after COPY so the app tree is not overwritten (path repo: packages/artgate).
+RUN mkdir -p packages \
+    && if [ -n "$ARTGATE_GIT_URL" ]; then \
+        git clone --depth 1 --branch "$ARTGATE_GIT_REF" "$ARTGATE_GIT_URL" packages/artgate; \
+    fi
+
+RUN if [ ! -f packages/artgate/composer.json ]; then \
+        echo "Build failed: artgate not found at packages/artgate."; \
         echo "Set Docker build-arg ARTGATE_GIT_URL to a git clone URL, or build from a monorepo context."; \
         exit 1; \
     fi

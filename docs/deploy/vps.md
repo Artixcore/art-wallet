@@ -1,8 +1,10 @@
 # VPS / bare-metal install (Composer + artgate)
 
-`artixcore/artgate` is wired as a **path** dependency (`../artgate`). If you only deploy `art-wallet` under `/var/www/art-wallet`, Composer fails with:
+`artixcore/artgate` is wired as a **path** dependency at **`packages/artgate`** inside this repository. That path must exist (clone or copy) before Composer can install it.
 
-`Source path "../artgate" is not found for package artixcore/artgate`
+If `packages/artgate` is missing, you may see:
+
+`Source path "packages/artgate" is not found for package artixcore/artgate`
 
 ## Fix
 
@@ -12,19 +14,20 @@
 sudo apt update && sudo apt install -y git unzip
 ```
 
-2. Provide **artgate** next to the app (same parent directory):
+2. From the app root (`/var/www/art-wallet`), provide **artgate** under `packages/artgate`.
 
-**Option A — helper script (needs your real artgate Git URL):**
+**Recommended — plain `composer install`:** `composer.json` runs `scripts/ensure-artgate.sh` before install/update. Export your real artgate clone URL once per shell session:
 
 ```bash
 cd /var/www/art-wallet
 export ARTGATE_GIT_URL="https://github.com/YOUR_ORG/artgate.git"
 # optional: export ARTGATE_GIT_REF=main
-composer run artgate:ensure
 composer install
 ```
 
-**Option B — one Composer alias:**
+If `packages/artgate/composer.json` already exists (e.g. monorepo or prior clone), the script exits immediately. **`composer install --no-scripts` skips this hook** — clone artgate manually, run `composer run artgate:ensure`, or `git clone` into `packages/artgate` before install.
+
+**Option B — explicit alias:**
 
 ```bash
 cd /var/www/art-wallet
@@ -35,8 +38,10 @@ composer run install-with-artgate
 **Option C — manual clone:**
 
 ```bash
-sudo git clone https://github.com/YOUR_ORG/artgate.git /var/www/artgate
-cd /var/www/art-wallet && composer install
+cd /var/www/art-wallet
+mkdir -p packages
+sudo git clone https://github.com/YOUR_ORG/artgate.git packages/artgate
+composer install
 ```
 
 The cloned repository **must** contain `composer.json` at its root (the public `github.com/artixcore/artgate` mirror does not ship that layout; use your private/source repo).
@@ -51,10 +56,14 @@ or, after changing `composer.json`, `composer update` as appropriate.
 
 ## Layout
 
+Only the app directory is required on the server; artgate lives **inside** it:
+
 ```text
-/var/www/
-  artgate/          ← artixcore/artgate (Composer path ../artgate)
-  art-wallet/       ← this application (current directory for composer)
+/var/www/art-wallet/
+  packages/
+    artgate/        ← artixcore/artgate (Composer path packages/artgate)
+  composer.json
+  ...
 ```
 
 ## Docker

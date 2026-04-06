@@ -18,7 +18,10 @@ jobs:
           extensions: mbstring, intl, pdo_sqlite, bcmath
           coverage: none
 
+      # Private path dep: set repo secret ARTGATE_GIT_URL (HTTPS with token if private). Fork PRs skip the secret.
       - name: Install Composer dependencies
+        env:
+          ARTGATE_GIT_URL: ${{ secrets.ARTGATE_GIT_URL }}
         run: composer install --no-interaction --prefer-dist --no-progress
 
       - name: Laravel Pint (style)
@@ -56,6 +59,8 @@ jobs:
           cache: npm
 
       - name: Install Composer dependencies
+        env:
+          ARTGATE_GIT_URL: ${{ secrets.ARTGATE_GIT_URL }}
         run: composer install --no-interaction --prefer-dist --no-progress
 
       - name: Prepare app env

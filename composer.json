@@ -8,12 +8,15 @@
     "repositories": [
         {
             "type": "path",
-            "url": "../artgate",
+            "url": "packages/artgate",
             "options": {
                 "symlink": true
             }
         }
     ],
+
+
+
     "require": {
         "php": "^8.3",
         "artixcore/artgate": "@dev",
@@ -45,6 +48,8 @@
         }
     },
     "scripts": {
+        "pre-install-cmd": "@artgate:ensure",
+        "pre-update-cmd": "@artgate:ensure",
         "artgate:ensure": "bash scripts/ensure-artgate.sh",
         "install-with-artgate": [
             "@artgate:ensure",

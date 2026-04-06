@@ -4,14 +4,14 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "24eb48f33e738b4e745926bed046a75d",
+    "content-hash": "30e01cbcb2f6c9aeb556a477824d596a",
     "packages": [
         {
             "name": "artixcore/artgate",
             "version": "dev-master",
             "dist": {
                 "type": "path",
-                "url": "../artgate",
+                "url": "packages/artgate",
                 "reference": "57a424b54507bc8d0e000458c40fbb24c4c1339b"
             },
             "require": {
