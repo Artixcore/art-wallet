@@ -2,6 +2,18 @@ import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
 
 export default defineConfig({
+    define: {
+        global: 'globalThis',
+    },
+    resolve: {
+        alias: {
+            process: 'process/browser',
+            buffer: 'buffer',
+        },
+    },
+    optimizeDeps: {
+        include: ['buffer', 'process'],
+    },
     plugins: [
         laravel({
             input: [

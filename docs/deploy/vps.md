@@ -1,5 +1,7 @@
 # VPS / bare-metal install (Composer + artgate)
 
+See also: [EC2 + Apache 2](ec2-apache.md) for AWS EC2, Apache `DocumentRoot` on `public/`, and TLS notes.
+
 `artixcore/artgate` is wired as a **path** dependency at **`packages/artgate`** inside this repository. That path must exist (clone or copy) before Composer can install it.
 
 If `packages/artgate` is missing, you may see:

@@ -1,0 +1,22 @@
+# Apache 2.4+ site configuration for ArtWallet (Laravel).
+# Copy to e.g. /etc/apache2/sites-available/art-wallet.conf, adjust paths and ServerName,
+# then: sudo a2ensite art-wallet && sudo a2dissite 000-default && sudo systemctl reload apache2
+#
+# Requires: a2enmod rewrite
+# PHP: use libapache2-mod-php8.3 or proxy to php8.3-fpm (not shown here).
+
+<VirtualHost *:80>
+    ServerName your-domain.example
+    ServerAdmin webmaster@localhost
+
+    DocumentRoot /var/www/art-wallet/public
+
+    <Directory /var/www/art-wallet/public>
+        Options FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+
+    ErrorLog ${APACHE_LOG_DIR}/art-wallet-error.log
+    CustomLog ${APACHE_LOG_DIR}/art-wallet-access.log combined
+</VirtualHost>

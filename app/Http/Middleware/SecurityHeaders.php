@@ -10,6 +10,7 @@ class SecurityHeaders
 {
     /**
      * CSP is global; onboarding relies on same-origin scripts (Vite) and WebCrypto.
+     * Bunny Fonts (layouts) and Cloudflare Web Analytics (when enabled on the zone) need explicit hosts.
      * Tighten per-route nonces in a future pass if you introduce third-party script tags.
      */
     public function handle(Request $request, Closure $next): Response
@@ -23,11 +24,11 @@ class SecurityHeaders
 
         $csp = implode('; ', [
             "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'",
-            "style-src 'self' 'unsafe-inline'",
+            "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://static.cloudflareinsights.com",
+            "style-src 'self' 'unsafe-inline' https://fonts.bunny.net",
             "img-src 'self' data: blob:",
-            "font-src 'self'",
-            "connect-src 'self'",
+            "font-src 'self' data: https://fonts.bunny.net",
+            "connect-src 'self' https://cloudflareinsights.com",
             "object-src 'none'",
             "frame-ancestors 'none'",
             "base-uri 'self'",
